@@ -1,0 +1,12 @@
+{
+  "source":"Sol VM streaming Woodbury-core benchmark, 2026-11-05",
+  "configuration":{"d":1024,"rhs":8,"update":"sequential rank-1 symmetric positive updates","base_state":"cached Cholesky solver","blas_threads":1},
+  "cases":[
+    {"rank":1,"append_ms":2.453905,"solve_ms":1.913991,"full_refactor_solve_ms":20.722951,"solve_speedup":10.827089051097941,"append_plus_solve_speedup":4.7443783002159385,"max_abs_error":6.800116025829084e-16},
+    {"rank":2,"append_ms":1.956024,"solve_ms":1.614862,"full_refactor_solve_ms":25.308636,"solve_speedup":15.672321226210041,"append_plus_solve_speedup":7.0874948122118715,"max_abs_error":6.106226635438361e-16},
+    {"rank":4,"append_ms":2.191139,"solve_ms":1.665838,"full_refactor_solve_ms":21.38633,"solve_speedup":12.838181143664631,"append_plus_solve_speedup":5.544842502301673,"max_abs_error":6.245004513516506e-16},
+    {"rank":8,"append_ms":1.555913,"solve_ms":1.761332,"full_refactor_solve_ms":21.02817,"solve_speedup":11.938788371527911,"append_plus_solve_speedup":6.33904640748573,"max_abs_error":6.002143226879753e-16},
+    {"rank":16,"append_ms":1.819279,"solve_ms":1.520459,"full_refactor_solve_ms":20.46347,"solve_speedup":13.458745023706658,"append_plus_solve_speedup":6.127268067135805,"max_abs_error":6.661338147750939e-16},
+    {"rank":32,"append_ms":1.573579,"solve_ms":1.437966,"full_refactor_solve_ms":25.169876,"solve_speedup":17.50380467966558,"append_plus_solve_speedup":8.357795085246941,"max_abs_error":5.898059818321144e-16}
+  ]
+}
