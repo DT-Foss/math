@@ -10,7 +10,7 @@ from .dirty import (
 from .compiler import DirtyGraphCompiler, DirtyPlan
 from .statistics import SufficientStatisticsState, NormalEquationsState
 from .symmetric import SymmetricLowRankDelta, WoodburyCache
-from .kernel import RowColumnDelta, RowColumnWoodbury, rbf_kernel, rbf_replacement_delta
+from .kernel import RowColumnDelta, RowColumnWoodbury, RowColumnSolverWoodbury, rbf_kernel, rbf_replacement_delta
 from .spectral import SparseDFTState, ButterflyFFTState
 from .cholesky import CholeskyState
 from .block import BlockAppendCache, delete_trailing_block_from_inverse
@@ -30,7 +30,7 @@ __all__ = [
     "DirtyGraphCompiler","DirtyPlan",
     "SufficientStatisticsState","NormalEquationsState",
     "SymmetricLowRankDelta","WoodburyCache",
-    "RowColumnDelta","RowColumnWoodbury","rbf_kernel","rbf_replacement_delta",
+    "RowColumnDelta","RowColumnWoodbury","RowColumnSolverWoodbury","rbf_kernel","rbf_replacement_delta",
     "SparseDFTState","ButterflyFFTState","CholeskyState",
     "BlockAppendCache","delete_trailing_block_from_inverse",
     "DeltaDescriptor","Structure",
