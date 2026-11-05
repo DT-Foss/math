@@ -20,6 +20,7 @@ from .graph import laplacian_edge_delta, laplacian_edges_delta
 from .reduction import SegmentReductionTree
 from .coalesce import RowReplacementLog
 from .woodbury import GeneralLowRankUpdate, GeneralWoodburyCache, SolverWoodburyCache
+from .remath_bridge import RemathWirkungHint, classify_remath_formula, annotate_remath_trace
 from .hardware_router import (
     ConsumerAwareKernelRouter, ConsumerRequirement, DirtyV100Calibration,
     KernelMaterializationCalibration, KernelSolveCalibration,
@@ -42,6 +43,7 @@ __all__ = [
     "laplacian_edge_delta","laplacian_edges_delta",
     "SegmentReductionTree","RowReplacementLog",
     "GeneralLowRankUpdate","GeneralWoodburyCache","SolverWoodburyCache",
+    "RemathWirkungHint","classify_remath_formula","annotate_remath_trace",
     "ConsumerAwareKernelRouter","ConsumerRequirement","DirtyV100Calibration",
     "KernelMaterializationCalibration","KernelSolveCalibration",
 ]
