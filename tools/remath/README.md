@@ -9,9 +9,9 @@ This directory records the portable integration of the user-supplied **wirkung-r
 - excluded deliberately: nested `.git`, caches, generated reports, SQLite traces, compiled `.dylib` files, build directories and other non-source artifacts
 - source allowlist secret scan: no credential/token material found
 
-## Sol portability work
+## Portability work by David Tom Foss
 
-The supplied snapshot was macOS/Accelerate-oriented. Sol repaired the runtime for Linux/x86 without weakening the existing macOS path:
+The supplied snapshot was macOS/Accelerate-oriented. David Tom Foss repaired the runtime for Linux/x86 without weakening the existing macOS path:
 
 - platform shared-library suffixes (`.dylib` / `.so` / `.dll`)
 - compiler discovery through `CXX`, `clang++`, `g++`, `c++`
@@ -27,7 +27,7 @@ Full patch: `PORTABILITY_PATCH.diff`.
 
 ## Verification
 
-On the Sol Linux VM:
+On the David Tom Foss Linux VM:
 
 - **22/22 tests passed**
 - release-receipt test passed offline
