@@ -16,9 +16,10 @@ from .cholesky import CholeskyState
 from .block import BlockAppendCache, delete_trailing_block_from_inverse
 from .delta_ir import DeltaDescriptor, Structure
 from .bilinear import DynamicNormalizedBilinearState, full_normalized_bilinear
+from .graph import laplacian_edge_delta, laplacian_edges_delta
 from .reduction import SegmentReductionTree
 from .coalesce import RowReplacementLog
-from .woodbury import GeneralLowRankUpdate, GeneralWoodburyCache
+from .woodbury import GeneralLowRankUpdate, GeneralWoodburyCache, SolverWoodburyCache
 
 __all__ = [
     "FactorDelta","crossover_rank","effective_edits","sparse_lowrank_update",
@@ -34,6 +35,7 @@ __all__ = [
     "BlockAppendCache","delete_trailing_block_from_inverse",
     "DeltaDescriptor","Structure",
     "DynamicNormalizedBilinearState","full_normalized_bilinear",
+    "laplacian_edge_delta","laplacian_edges_delta",
     "SegmentReductionTree","RowReplacementLog",
-    "GeneralLowRankUpdate","GeneralWoodburyCache",
+    "GeneralLowRankUpdate","GeneralWoodburyCache","SolverWoodburyCache",
 ]
