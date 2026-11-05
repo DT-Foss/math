@@ -34,7 +34,7 @@ class DeltaDescriptor:
     def through_elementwise(self) -> "DeltaDescriptor":
         keep=set(self.structures)
         keep.discard(Structure.LOW_RANK)
-        if not ({Structure.SPARSE_ROWS,Structure.DIRTY_GEOMETRY}&keep):
+        if not ({Structure.SPARSE_ROWS,Structure.SPARSE_COLS,Structure.ROW_COLUMN,Structure.DIRTY_GEOMETRY}&keep):
             keep.add(Structure.DENSE)
         return DeltaDescriptor(
             self.shape,frozenset(keep),self.changed_rows,self.changed_cols,
