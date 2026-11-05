@@ -42,6 +42,20 @@ from .hardware_router import (
     KernelMaterializationCalibration, KernelSolveCalibration,
     SparseSpectrumV100Calibration, NormalizedQueryV100Calibration,
 )
+from .temporal_linear import (
+    sparse_linear_delta, TemporalLinearState, BasisDeltaLinearState,
+    BatchLowRankLinearState, TemporalRMSNormLinearState,
+)
+from .router_certificate import CertifiedTopKRouterState
+from .partition_attention import CompiledPartitionAttention, PartitionAttentionBank
+from .temporal_census import (
+    TemporalDeltaRecord, TemporalDeltaCensus, measure_temporal_delta,
+    support_for_energy, effective_rank,
+)
+from .temporal_delta_machine import (
+    LinearDeltaRoute, DeltaPortfolio, LinearRouteCost, LinearDeltaPlanner,
+    BeastDecodeBudget, ProjectedDecodeBudget, OrigamiDeltaMachineTarget,
+)
 
 __all__ = [
     "FactorDelta","crossover_rank","effective_edits","sparse_lowrank_update",
@@ -73,4 +87,11 @@ __all__ = [
     "ConsumerAwareKernelRouter","ConsumerRequirement","DirtyV100Calibration",
     "KernelMaterializationCalibration","KernelSolveCalibration",
     "SparseSpectrumV100Calibration","NormalizedQueryV100Calibration",
+    "sparse_linear_delta","TemporalLinearState","BasisDeltaLinearState",
+    "BatchLowRankLinearState","TemporalRMSNormLinearState",
+    "CertifiedTopKRouterState","CompiledPartitionAttention","PartitionAttentionBank",
+    "TemporalDeltaRecord","TemporalDeltaCensus","measure_temporal_delta",
+    "support_for_energy","effective_rank",
+    "LinearDeltaRoute","DeltaPortfolio","LinearRouteCost","LinearDeltaPlanner",
+    "BeastDecodeBudget","ProjectedDecodeBudget","OrigamiDeltaMachineTarget",
 ]
