@@ -30,6 +30,7 @@ from .demand_linear import sparse_requested_linear_delta
 from .hardware_router import (
     ConsumerAwareKernelRouter, ConsumerRequirement, DirtyV100Calibration,
     KernelMaterializationCalibration, KernelSolveCalibration,
+    SparseSpectrumV100Calibration, NormalizedQueryV100Calibration,
 )
 
 __all__ = [
@@ -56,4 +57,5 @@ __all__ = [
     "LazyNormalizedKVState","ExecutionRegime","HorizonPlanner","sparse_requested_linear_delta",
     "ConsumerAwareKernelRouter","ConsumerRequirement","DirtyV100Calibration",
     "KernelMaterializationCalibration","KernelSolveCalibration",
+    "SparseSpectrumV100Calibration","NormalizedQueryV100Calibration",
 ]
