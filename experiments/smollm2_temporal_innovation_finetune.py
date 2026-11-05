@@ -100,8 +100,9 @@ def eval_metrics(model,teacher,bases,chunks,device):
     with torch.no_grad():
         for batch in batch_iterator(chunks,2,6,SEED+99):
             x=batch.to(device)
-            t=teacher(x,output_hidden_states=True,use_cache=False)
-            s=model(x,output_hidden_states=True,use_cache=False)
+            with torch.autocast("cuda",dtype=torch.float16):
+                t=teacher(x,output_hidden_states=True,use_cache=False)
+                s=model(x,output_hidden_states=True,use_cache=False)
             logits_mse.append(float(normalized_mse(s.logits,t.logits)))
             top1.append(float((s.logits.argmax(-1)==t.logits.argmax(-1)).float().mean()))
             labels=x[:,1:]
@@ -124,6 +125,7 @@ def eval_metrics(model,teacher,bases,chunks,device):
             rank99=int(torch.searchsorted(cum,.99*energy.sum()).item()+1)
             row[kind]={"basis_capture":capture,"rank_90":rank90,"rank_99":rank99}
         layers[str(layer)]=row
+    model.train()
     return {
         "normalized_logit_mse":float(np.mean(logits_mse)),
         "top1_agreement":float(np.mean(top1)),
@@ -140,8 +142,10 @@ def main():
     device=torch.device("cuda")
     tokenizer=AutoTokenizer.from_pretrained(MODEL_ID)
     train_chunks,eval_chunks=make_chunks(tokenizer)
-    teacher=AutoModelForCausalLM.from_pretrained(MODEL_ID,torch_dtype=torch.float16).to(device).eval()
-    student=AutoModelForCausalLM.from_pretrained(MODEL_ID,torch_dtype=torch.float16).to(device).train()
+    teacher=AutoModelForCausalLM.from_pretrained(MODEL_ID,dtype=torch.float16).to(device).eval()
+    # FP32 master parameters + FP16 autocast keeps GradScaler valid and the
+    # optimizer state numerically stable.
+    student=AutoModelForCausalLM.from_pretrained(MODEL_ID,dtype=torch.float32).to(device).train()
     for p in teacher.parameters():p.requires_grad_(False)
     bases=initialize_bases(teacher,train_chunks,device,TEMPORAL_RANK)
     optimizer=torch.optim.AdamW([
@@ -153,14 +157,14 @@ def main():
     history=[];started=time.time()
     for step,batch in enumerate(batch_iterator(train_chunks,BATCH,STEPS,SEED+2),1):
         x=batch.to(device);optimizer.zero_grad(set_to_none=True)
-        with torch.no_grad():
+        with torch.no_grad(),torch.autocast("cuda",dtype=torch.float16):
             t=teacher(x,output_hidden_states=True,use_cache=False)
         with torch.autocast("cuda",dtype=torch.float16):
             s=student(x,output_hidden_states=True,use_cache=False)
             logit_loss=normalized_mse(s.logits,t.logits)
             labels=x[:,1:]
             ce=F.cross_entropy(s.logits[:,:-1].float().reshape(-1,s.logits.shape[-1]),labels.reshape(-1))
-            hidden= torch.stack([normalized_mse(s.hidden_states[l+1],t.hidden_states[l+1]) for l in SELECTED]).mean()
+            hidden=torch.stack([normalized_mse(s.hidden_states[l+1],t.hidden_states[l+1]) for l in SELECTED]).mean()
             temp,capture=temporal_loss(s.hidden_states,bases)
             loss=logit_loss+.05*ce+HIDDEN_WEIGHT*hidden+TEMPORAL_WEIGHT*temp
         scaler.scale(loss).backward()
