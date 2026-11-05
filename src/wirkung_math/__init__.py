@@ -49,6 +49,11 @@ from .temporal_linear import (
 from .temporal_multilinear import TemporalRMSNormMultiLinearState
 from .temporal_quantized import QuantizedVectorState, QuantizedTemporalLinearState
 from .temporal_activation import QuantizedSwiGLUDownState, silu, nearest_codes
+from .temporal_basis import TemporalDeltaBasis, EncodedTemporalDelta, exact_batch_factorization
+from .delta_layout import (
+    ColumnPackedLinearOperator, ColumnPackedTemporalLinearState,
+    ColumnPackedRMSNormLinearState, ColumnPackedRMSNormMultiLinearState,
+)
 from .router_certificate import CertifiedTopKRouterState
 from .partition_attention import CompiledPartitionAttention, PartitionAttentionBank
 from .tensor_train import TensorTrain
@@ -100,6 +105,9 @@ __all__ = [
     "BatchLowRankLinearState","TemporalRMSNormLinearState",
     "TemporalRMSNormMultiLinearState","QuantizedVectorState","QuantizedTemporalLinearState",
     "QuantizedSwiGLUDownState","silu","nearest_codes",
+    "TemporalDeltaBasis","EncodedTemporalDelta","exact_batch_factorization",
+    "ColumnPackedLinearOperator","ColumnPackedTemporalLinearState",
+    "ColumnPackedRMSNormLinearState","ColumnPackedRMSNormMultiLinearState",
     "CertifiedTopKRouterState","CompiledPartitionAttention","PartitionAttentionBank",
     "TensorTrain","TensorTrainPartitionAttention",
     "DeltaLinearOperator","DenseDeltaLinearOperator","CallbackDeltaLinearOperator",
