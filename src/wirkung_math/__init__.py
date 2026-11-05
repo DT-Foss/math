@@ -46,6 +46,8 @@ from .temporal_linear import (
     sparse_linear_delta, TemporalLinearState, BasisDeltaLinearState,
     BatchLowRankLinearState, TemporalRMSNormLinearState,
 )
+from .temporal_multilinear import TemporalRMSNormMultiLinearState
+from .temporal_quantized import QuantizedVectorState, QuantizedTemporalLinearState
 from .router_certificate import CertifiedTopKRouterState
 from .partition_attention import CompiledPartitionAttention, PartitionAttentionBank
 from .temporal_census import (
@@ -89,6 +91,7 @@ __all__ = [
     "SparseSpectrumV100Calibration","NormalizedQueryV100Calibration",
     "sparse_linear_delta","TemporalLinearState","BasisDeltaLinearState",
     "BatchLowRankLinearState","TemporalRMSNormLinearState",
+    "TemporalRMSNormMultiLinearState","QuantizedVectorState","QuantizedTemporalLinearState",
     "CertifiedTopKRouterState","CompiledPartitionAttention","PartitionAttentionBank",
     "TemporalDeltaRecord","TemporalDeltaCensus","measure_temporal_delta",
     "support_for_energy","effective_rank",
