@@ -21,6 +21,8 @@ from .reduction import SegmentReductionTree
 from .coalesce import RowReplacementLog
 from .woodbury import GeneralLowRankUpdate, GeneralWoodburyCache, SolverWoodburyCache
 from .remath_bridge import RemathWirkungHint, classify_remath_formula, annotate_remath_trace
+from .dirty2d import AreaCostModel, DirtyGraphCompiler2D, DirtyPlan2D, Rect, schedule_rectangles_optimal
+from .update_ledger import LowRankUpdateLedger
 from .hardware_router import (
     ConsumerAwareKernelRouter, ConsumerRequirement, DirtyV100Calibration,
     KernelMaterializationCalibration, KernelSolveCalibration,
@@ -44,6 +46,8 @@ __all__ = [
     "SegmentReductionTree","RowReplacementLog",
     "GeneralLowRankUpdate","GeneralWoodburyCache","SolverWoodburyCache",
     "RemathWirkungHint","classify_remath_formula","annotate_remath_trace",
+    "AreaCostModel","DirtyGraphCompiler2D","DirtyPlan2D","Rect","schedule_rectangles_optimal",
+    "LowRankUpdateLedger",
     "ConsumerAwareKernelRouter","ConsumerRequirement","DirtyV100Calibration",
     "KernelMaterializationCalibration","KernelSolveCalibration",
 ]
