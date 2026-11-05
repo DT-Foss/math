@@ -55,3 +55,38 @@ The recompressed factors are `Q_L U sqrt(Σ)` and `Q_R V sqrt(Σ)`.
 This recovers the numerical rank of an accumulated factor ledger without constructing `Δ`.
 
 Implementation: `FactorDelta.compact`.
+
+
+## A007 — Geometric dirty-component propagation
+
+A sparse support set is decomposed into connected components before receptive-field expansion. Components are kept separate unless their propagated cones overlap or the executor cost model makes filling the gap cheaper than paying another launch.
+
+For adjacent cones separated by gap `g`, the two-tile versus merged decision under the calibrated linear model is:
+
+`merge iff cell_cost * g <= launch_cost`.
+
+Implementation: `dirty.GeometryCostModel`, `compiler.DirtyGraphCompiler`.
+
+## A008 — Optimal dirty-tile partition
+
+For ordered cone components, choose contiguous groups minimizing:
+
+`sum_groups [launch_cost + cell_cost * hull_width(group)]`.
+
+The implementation uses dynamic programming over all possible final groups, avoiding greedy-order artifacts.
+
+Implementation: `dirty.schedule_components_optimal`.
+
+## A009 — Cached global consumer repair
+
+For a cached global sum `S=sum_i x_i` and dirty terminal set `D`:
+
+`S' = S - sum_{i in D} x_i + sum_{i in D} x'_i`.
+
+For a narrow linear consumer `G=sum_i x_i W`:
+
+`G' = G + (sum_{i in D}(x'_i-x_i)) W`.
+
+Only dirty terminal rows are read.
+
+Implementation: `dirty.update_global_sum`, `dirty.update_projected_global_sum`.
