@@ -71,3 +71,30 @@ The row/column rank<=2e law applies to arbitrary symmetric pairwise matrices, gr
 
 ### 12. Dynamic normalized bilinear row/column cross
 A small Q/K/V row replacement creates full dirty query rows plus sparse changed key/value columns. Clean rows update from normalized sufficient statistics; only changed query rows recompute.
+
+
+## Newly closed gaps
+
+### 13. True 2-D dirty geometry
+The strongest local/V100 measurements are two-dimensional. `DirtyGraphCompiler2D` now represents dirty components as rectangles, expands receptive fields in 2-D, and minimizes
+
+`sum_tiles [launch_cost + cell_cost * area(hull(tile_group))]`.
+
+For <=12 components it searches the exact set-partition optimum; larger sets use a deterministic positive-saving agglomerative fallback.
+
+### 14. Streaming solver delta ledger
+Repeated low-rank matrix updates are concatenated against one base solver rather than building an ever-deeper chain of nested Woodbury wrappers. `LowRankUpdateLedger` can rank-reveal the accumulated update by QR + small SVD and regenerate one compact solver cache.
+
+### 15. Consumer-aware hardware routing
+The CPU/GPU decision includes `required_representation`.
+
+The measured RBF example proves why:
+- full dense K at n=8192 crosses back to V100 after only a few edits;
+- RBF -> solve can keep rank<=2e and still beats V100 full kernel+solve by 16.57× / 11.51× / 4.54× for e=1/4/16 at n=4096.
+
+### 16. Remath semantic front-end
+Remath's recognized mathematical meaning now feeds Wirkung through `remath_bridge.py`. Formula families such as GEMM, Softmax, RMSNorm, Attention and elementwise activation are mapped to the corresponding delta rewrite family before the cost/hardware router runs.
+
+The intended compiler path is now:
+
+`program -> Remath execution/formula graph -> Wirkung structure transform -> cost model -> CPU/GPU executor`.
