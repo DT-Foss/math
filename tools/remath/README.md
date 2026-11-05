@@ -50,3 +50,19 @@ Remath provides the observability layer needed by the delta compiler:
 `program -> execution graph -> recognized mathematical operator -> delta representation -> rewrite/router decision`
 
 The next integration boundary is therefore operator recognition and cost annotation, not copying raw build artifacts.
+
+
+## Live Wirkung bridge
+
+`src/wirkung_math/remath_bridge.py` consumes Remath `FormulaSpec` / `GraphNode` objects (or their dictionary form) without requiring Remath as a runtime dependency.
+
+Current semantic routes include:
+
+- Scaled Dot-Product Attention -> dynamic normalized bilinear state;
+- Stable Softmax -> mass-gated normalized sufficient state;
+- RMSNorm/LayerNorm -> structured normalization rewrite;
+- GEMM/GEMV / matrix contraction -> lazy factor propagation;
+- SiLU/SwiGLU and other activations -> preserve support geometry while allowing rank structure to change;
+- additive/order/spectral reductions -> their corresponding incremental state families.
+
+This is the intended integration point: Remath discovers mathematical meaning; Wirkung chooses the state-transition algebra and hardware route.
