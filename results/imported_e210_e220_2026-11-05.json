@@ -1,0 +1,38 @@
+{
+  "source":"user-supplied E210-E220 CPU-box/V100 continuation, 2026-11-05",
+  "statistics_pipeline_vs_v100":[
+    {"n":1048576,"d":256,"edits":1,"rhs":16,"v100_full_ms":19.89,"cpu_delta_ms":0.394,"cpu_over_v100":50.48},
+    {"n":1048576,"d":256,"edits":4,"rhs":16,"v100_full_ms":18.967552185058594,"cpu_delta_ms":0.3931779647246003,"cpu_over_v100":48.241645989353266},
+    {"n":1048576,"d":256,"edits":16,"rhs":16,"v100_full_ms":18.935808181762695,"cpu_delta_ms":0.5558379925787449,"cpu_over_v100":34.0671354505874},
+    {"n":4194304,"d":256,"edits":1,"rhs":16,"v100_full_ms":74.64959716796875,"cpu_delta_ms":0.3969579702243209,"cpu_over_v100":188.05415879616746},
+    {"n":4194304,"d":256,"edits":16,"rhs":16,"v100_full_ms":74.99571228027344,"cpu_delta_ms":0.574747915379703,"cpu_over_v100":130.4845311717713},
+    {"n":8388608,"d":256,"edits":1,"rhs":16,"v100_full_ms":149.94943237304688,"cpu_delta_ms":0.6637080805376172,"cpu_over_v100":225.92678433504193}
+  ],
+  "dirty_residual_vs_v100":[
+    {"size":3072,"v100_full_ms":107.11398696899414,"cpu_delta_ms":2.538115542847663,"cpu_over_v100":42.202171319914214},
+    {"size":4096,"v100_full_ms":181.87417602539062,"cpu_delta_ms":2.869844436645508,"cpu_over_v100":63.37422812993271},
+    {"size":6144,"v100_full_ms":457.7520751953125,"cpu_delta_ms":3.0465239542536438,"cpu_over_v100":150.25389002971272},
+    {"size":8192,"v100_full_ms":755.0674133300781,"cpu_delta_ms":3.210753493476659,"cpu_over_v100":235.16829145063957}
+  ],
+  "moments_gram_vs_v100":[
+    {"n":8388608,"d":64,"edits":64,"v100_full_ms":35.52102470397949,"cpu_delta_ms":0.07135496707633138,"cpu_over_v100":497.80731684706933},
+    {"n":16777216,"d":64,"edits":64,"gpu_path":"unfused","v100_full_ms":69.86956787109375,"cpu_delta_ms":0.07258448749780655,"cpu_over_v100":962.5964208014166},
+    {"n":16777216,"d":64,"edits":64,"gpu_path":"fused var_mean + Gram","v100_full_ms":31.173632621765137,"cpu_delta_ms":0.06834958912804723,"cpu_over_v100":456.09100243988223},
+    {"n":33554432,"d":64,"edits":64,"gpu_path":"fused var_mean + Gram","v100_full_ms":61.471744537353516,"cpu_delta_ms":0.07093005115166306,"cpu_over_v100":866.6530411195426},
+    {"n":33554432,"d":64,"edits":64,"gpu_path":"fused var_mean + Gram","cpu_threads":4,"v100_full_ms":61.50655937194824,"cpu_delta_ms":0.06596499588340521,"cpu_over_v100":932.4120853530051},
+    {"n":33554432,"d":64,"edits":64,"gpu_path":"fused var_mean + Gram","cpu_threads":4,"cpu_q":"einsum no square temporaries","v100_full_ms":61.09900665283203,"cpu_delta_ms":0.05300954217091203,"cpu_over_v100":1152.6039303610312},
+    {"n":33554432,"d":64,"edits":1,"gpu_path":"fused var_mean + Gram","v100_full_ms":61.092,"cpu_delta_ms":0.0375,"cpu_over_v100":1627.18}
+  ],
+  "dual_v100_stats":{
+    "n":33554432,"d":64,"edits":64,
+    "dual_v100_full_ms":70.54612005595118,
+    "cpu_delta_ms":0.12532994151115417,
+    "cpu_over_dual_v100":562.8832121466576
+  },
+  "isolated_rank1_cpu":{
+    "generic_us":39.05000630766153,
+    "specialized_rank1_us":21.429965272545815,
+    "max_abs_difference":8.881784197001252e-16,
+    "full_direct_v100_validation_of_specialized_path":"pending in supplied excerpt"
+  }
+}
