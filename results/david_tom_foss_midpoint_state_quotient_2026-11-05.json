@@ -1,0 +1,27 @@
+{
+  "source":"David Tom Foss VM controlled follow-up, 2026-11-05",
+  "midpoint_difference_statistics":{
+    "shape":{"dim":64},
+    "blas_threads":1,
+    "cases":[
+      {"edited_rows":1,"direct_two_gram_median_us":20.441,"midpoint_one_gram_median_us":14.572,"speedup":1.4027587153444963,"max_abs_error":7.216449660063518e-16},
+      {"edited_rows":4,"direct_two_gram_median_us":16.495,"midpoint_one_gram_median_us":11.0215,"speedup":1.4966202422537769,"max_abs_error":3.4416913763379853e-15},
+      {"edited_rows":16,"direct_two_gram_median_us":21.222,"midpoint_one_gram_median_us":13.25,"speedup":1.6016603773584908,"max_abs_error":1.0935696792557792e-14},
+      {"edited_rows":64,"direct_two_gram_median_us":38.428,"midpoint_one_gram_median_us":22.148,"speedup":1.7350550839804948,"max_abs_error":6.394884621840902e-14}
+    ],
+    "conditioning_check":{
+      "old_scale":1000000.0,
+      "edit_scale":0.0001,
+      "direct_max_abs_error_vs_longdouble":0.06778717041015625,
+      "midpoint_max_abs_error_vs_longdouble":3.981954068876803e-05,
+      "error_reduction_factor":1702.362250894122
+    }
+  },
+  "state_quotient_33554432x64_fp64":{
+    "raw_bytes":17179869184,
+    "raw_GiB":16.0,
+    "sum_sumsq_gram_bytes":33792,
+    "hot_KiB":33.0,
+    "raw_to_hot_ratio":508400.48484848486
+  }
+}
