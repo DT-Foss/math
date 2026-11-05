@@ -32,7 +32,12 @@
       {"delta_scale":0.5,"energy_in_2x_rank":0.8140000759976351,"energy_in_input_rank":0.7059003417755836,"input_rank":4,"output_numerical_rank":64},
       {"delta_scale":1.0,"energy_in_2x_rank":0.8640063803326247,"energy_in_input_rank":0.7253961639373377,"input_rank":4,"output_numerical_rank":64}
     ]},
-    {"compact_ms":68.13876399996843,"compacted_rank":8,"compression":16.0,"d":64,"experiment":"E177","materialize_compacted_ms":0.20523900002444861,"materialize_speedup_after_compaction":10.347775032057031,"materialize_uncompacted_ms":2.1237670000573416,"max_abs_error":2.5579538487363607e-12,"n":4096,"nominal_rank":128,"term_rank":4,"terms":32}
+    {"compact_ms":68.13876399996843,"compacted_rank":8,"compression":16.0,"d":64,"experiment":"E177","materialize_compacted_ms":0.20523900002444861,"materialize_speedup_after_compaction":10.347775032057031,"materialize_uncompacted_ms":2.1237670000573416,"max_abs_error":2.5579538487363607e-12,"n":4096,"nominal_rank":128,"term_rank":4,"terms":32},
+    {"experiment":"E187","n":131072,"d":64,"edits":256,"projection_width":8,
+      "sum_full_ms":9.31242799993015,"sum_delta_ms":0.014340999996420578,"sum_speedup":649.3569487660884,
+      "sum_max_abs_error":1.3642420526593924e-12,
+      "projected_full_ms":11.122051000029387,"projected_delta_ms":0.0247780001245701,"projected_speedup":448.8679854755774,
+      "projected_max_abs_error":9.094947017729282e-12}
   ],
   "run_id":"chatgpt-vm-2026-11-05"
 }
