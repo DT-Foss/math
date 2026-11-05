@@ -1,0 +1,66 @@
+{
+  "source": "David Tom Foss Hugging Face CPU-performance job 6aecfd9dc78863f9c633a79f, 2026-11-05",
+  "model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+  "model_class": "LlamaForCausalLM",
+  "parameters": 134515008,
+  "layers": 30,
+  "environment": {
+    "cpu_count": 32,
+    "torch_threads": 8,
+    "torch": "2.7.1+cpu"
+  },
+  "sequence": {
+    "prompt_tokens": 45,
+    "generated_tokens": 24,
+    "replay_transitions": 24,
+    "generation_ms": 1562.488707,
+    "generation_tokens_per_second": 15.360111015509567,
+    "full_capture_forward_ms": 96.802281
+  },
+  "linear_replay": {
+    "modules": 210,
+    "4bit": {
+      "full_linear_ms_per_transition": 9.27695975,
+      "routed_temporal_plus_quantization_ms_per_transition": 9.192676458333333,
+      "speedup": 1.0091685258421406,
+      "delta_route_modules": 18,
+      "routed_speedup_without_quantization_scan": 1.0304444363513483,
+      "by_module_type": {
+        "down_proj": {"full_ms": 49.568673, "routed_ms": 44.207551, "speedup": 1.1212716352462047, "delta_modules": 16},
+        "gate_proj": {"speedup": 1.0112270752609422, "delta_modules": 1},
+        "up_proj": {"speedup": 1.0110452212553498, "delta_modules": 1},
+        "q_proj": {"speedup": 1.0, "delta_modules": 0},
+        "k_proj": {"speedup": 1.0, "delta_modules": 0},
+        "v_proj": {"speedup": 1.0, "delta_modules": 0},
+        "o_proj": {"speedup": 1.0, "delta_modules": 0}
+      },
+      "fastest_examples": [
+        {"layer": 29, "module": "gate_proj", "speedup_detect_plus_apply": 1.519061942451265, "support_median": 17.5},
+        {"layer": 29, "module": "up_proj", "speedup_detect_plus_apply": 1.4963304076088078, "support_median": 17.5},
+        {"layer": 28, "module": "down_proj", "speedup_detect_plus_apply": 1.4454525246223733, "speedup_apply_only": 5.901095965602416, "support_median": 20.5}
+      ],
+      "source_geometry": {
+        "attn_norm": {"code_change_fraction_median": 0.04513888888888889, "delta_rank_99_median": 21, "quantized_relative_l2_error_median": 0.49273376166820526},
+        "attn_out": {"code_change_fraction_median": 0.21875, "delta_rank_99_median": 19, "quantized_relative_l2_error_median": 0.36750628054142},
+        "mlp_hidden": {"code_change_fraction_median": 0.05729166666666667, "delta_rank_99_median": 20, "quantized_relative_l2_error_median": 0.6250945031642914},
+        "mlp_norm": {"code_change_fraction_median": 0.3289930555555556, "delta_rank_99_median": 21, "quantized_relative_l2_error_median": 0.490524560213089}
+      }
+    },
+    "5bit": {
+      "full_linear_ms_per_transition": 9.518906166666666,
+      "routed_temporal_plus_quantization_ms_per_transition": 9.691672625,
+      "speedup": 0.9821737211915643,
+      "delta_route_modules": 3
+    },
+    "8bit": {
+      "full_linear_ms_per_transition": 9.372790916666666,
+      "routed_temporal_plus_quantization_ms_per_transition": 9.55542425,
+      "speedup": 0.9808869466645259,
+      "delta_route_modules": 0
+    }
+  },
+  "conclusion": {
+    "positive": "Real token states validate exact temporal replay and expose profitable late-layer/down-projection pockets; direction-major apply-only kernels are substantially faster where event support is small.",
+    "boundary": "Independent frame quantization has a rate-distortion inversion: low-bit codes create sparse events with excessive activation distortion, while higher-fidelity codes change almost everywhere. The next codec must optimize temporal innovation entropy and consumer effect directly."
+  }
+}
