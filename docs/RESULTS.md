@@ -376,3 +376,109 @@ For d=1024, 8 RHS and sequential rank-1 updates on top of a cached Cholesky base
 - max absolute errors stay below 7e-16.
 
 This closes the persistent-state gap for the low-rank solver family as well as for dirty-local execution.
+
+
+## Final E205–E209 closure — CPU box / resident V100
+
+Machine-readable provenance: `results/imported_e205_e209_final_2026-11-05.json`.
+
+### Final local-graph V100 crossover
+
+For channels=16, layers=12, patch=8:
+
+- 256²: GPU wins (0.928 ms vs 1.731 ms CPU delta)
+- 320²: GPU wins (1.427 ms vs 1.727 ms)
+- 352²: near parity (1.723 ms vs 1.791 ms)
+- 384²: CPU delta **1.15×**
+- 512²: **1.95×**
+- 1024²: **5.51×**
+- 1536²: **13.00×**
+- 2048²: **18.97×**
+
+The measured switching interval is 352–384 pixels; interpolation places parity at roughly 359 pixels.
+
+### Streaming normalized sufficient state
+
+Scores / normalization state / K/V state were maintained through 40 sequential updates:
+
+- n=1024: median 5.52×, minimum 2.13×
+- n=2048: median 10.69×, minimum 6.59×
+- max error ~5.1e-10
+- no state drift.
+
+### GPU -> CPU state handoff
+
+Pageable copies amortized after ~36–44 updates. Pinned D2H transfer reached ~13.2 GB/s and reduced the measured eager-cache break-even to **6–8 updates**:
+
+- 1024²: 872 MB, 64.9 ms
+- 1536²: 1.96 GB, 149.2 ms
+- 2048²: 3.49 GB, 265.4 ms.
+
+### Requested Fourier coefficients versus full V100 FFT
+
+n=1,048,576, 16 changed input values:
+
+- 1 coefficient: CPU **11.40×**
+- 16: **11.67×**
+- 256: **5.70×**
+- 4,096: **3.02×**
+- 16,384: **1.42×**
+- 65,536: V100 wins
+- 262,144: V100 wins.
+
+The measured requested-output crossover lies between 16,384 and 65,536 coefficients.
+
+### Requested normalized queries versus V100
+
+n=8192, heads=2, d=64, 16 changed terms:
+
+- 1 query: CPU **1.18×**
+- 16: **1.93×**
+- 32: **2.63×**
+- 64: **1.65×**
+- 128: **1.03×**
+- 256: V100 wins
+- 1024: V100 wins.
+
+The measured crossover lies between 128 and 256 requested query rows.
+
+## David Tom Foss follow-up: cacheless local reconstruction
+
+Machine-readable record: `results/david_tom_foss_cacheless_local_2026-11-05.json`.
+
+A 12-layer 3×3 Conv/SiLU/residual graph with patch=8 has total receptive radius R=12. The final dirty region has side 32, but it can be reconstructed exactly from an old/new input crop of side
+
+`p + 4R = 56`.
+
+No full intermediate activation cache is required for a consumer that only needs the dirty final output and an incrementally repairable downstream statistic.
+
+Four-thread CPU measurements:
+
+- 256²: 7.35× vs CPU full
+- 512²: 77.62×
+- 1024²: 197.78×
+- 1536²: **533.48×**
+- final dirty regions matched exactly in the measured runs
+- incremental global-sum repair at 512² matched exactly.
+
+The FP32 input crop is only 200,704 bytes. A 2048² full 13-state activation cache is 3.49 GB: **17,387× more bytes**. At the measured ~13.2 GB/s pinned bandwidth, transferring one such input crop is only ~0.015 ms before launch/gather overhead.
+
+This exposes a new state-residency regime: cacheless dual-crop reconstruction can remove the eager multi-GB activation handoff entirely.
+
+## David Tom Foss follow-up: lazy normalized query reconciliation
+
+Machine-readable record: `results/david_tom_foss_lazy_queries_2026-11-05.json`.
+
+K/V updates are appended to a versioned edit log; only requested query rows reconcile outstanding edits. At n=4096,d=64,e=16, compared with eagerly updating every CPU query state:
+
+- 1 requested row: **44.90×** less update work
+- 16: **33.48×**
+- 32: **27.34×**
+- 64: **22.08×**
+- 128: **15.56×**
+- 256: **9.51×**
+- 512: **5.48×**
+
+Maximum FP32 error in the controlled check was ~4.98e-8.
+
+This composes streaming state with demand sparsity: unrequested outputs may remain stale at zero maintenance cost and are reconciled exactly when accessed.
