@@ -1,0 +1,145 @@
+{
+  "source": "user-supplied CPU-box results, 2026-11-05, extended manual round",
+  "sparse_lowrank": {
+    "correct": "27/27",
+    "selected": [
+      {"n":8192,"edits":64,"rank":4,"speedup":16.20},
+      {"n":8192,"edits":256,"rank":16,"speedup":12.34},
+      {"n":8192,"edits":1024,"rank":4,"speedup":6.21},
+      {"n":2048,"edits":1024,"rank":4,"speedup":1.85}
+    ]
+  },
+  "global_lowrank": {
+    "correct":"15/15",
+    "best_speedup":2.0069259295364494,
+    "rank_32_speedup_range":[1.08,1.49],
+    "n8192_d64_rank64_speedup":0.98
+  },
+  "dimension_lowrank": {
+    "correct":"20/20 across supplied dimension runs",
+    "n4096_d1024_rank64_speedup":4.376735247681605,
+    "n8192_d1024_rank4_speedup":3.1421832042406064,
+    "n8192_d1024_rank256_speedup":1.9349748361931334
+  },
+  "lazy_lowrank_chain": {
+    "correct":"18/18",
+    "two_layers_best":5.52,
+    "four_layers_best":6.18,
+    "eight_layers_n2048_best":6.94,
+    "eight_layers_n8192_best":7.20,
+    "eight_layers_n8192_rank64":6.53
+  },
+  "lazy_narrow_consumer": {
+    "correct":"18/18",
+    "four_layers_best":105.14,
+    "eight_layers_best":105.22,
+    "rank64_speedup_range":[12.5,26.7],
+    "max_abs_error":3.6e-7
+  },
+  "lazy_chain_abba": {
+    "rounds":20,
+    "full_ms_median":55.631362745771185,
+    "lazy_ms_median":0.761,
+    "paired_speedup_median":75.35,
+    "paired_speedup_min":24.55,
+    "max_abs_error":2.34e-7
+  },
+  "compiled_full_baseline_vs_delta": {
+    "correct":"12/12",
+    "max_speedup":3.5364244255922417,
+    "width16_range":[1.93,3.54],
+    "width64_range":[1.36,2.68],
+    "width256_range":[1.24,2.18]
+  },
+  "dirty_thread_envelope": {
+    "correct":"18/18",
+    "best_full_threads":16,
+    "best_full_ms":3708.89518794138,
+    "patches":[
+      {"patch":1,"best_delta_ms":5.318148992955685,"best_delta_threads":8,"speedup":697.4033997268804},
+      {"patch":8,"best_delta_threads":16,"speedup":587.0},
+      {"patch":64,"best_delta_ms":12.987148948013783,"best_delta_threads":16,"speedup":285.5819397149986}
+    ]
+  },
+  "dirty_global_end_to_end": {
+    "correct":"9/9",
+    "patch1_best":601.5,
+    "patch8_best":502.8,
+    "patch64_best":171.5
+  },
+  "dirty_global_fp64": {
+    "patch1_best":533.886063859005,
+    "patch8_best":507.02495190957484,
+    "patch64_best":239.52763733099528,
+    "max_relative_error":1.3416294932315204e-11
+  },
+  "incremental_moments": {
+    "correct":"9/9",
+    "max_abs_error":1.5e-14,
+    "n1048576_edits64_speedup":9117.366490980943,
+    "n1048576_edits1024_speedup":1065.6086955227775,
+    "n1048576_edits16384_speedup":73.33905181294097,
+    "n65536_fraction025_speedup":5.58
+  },
+  "incremental_gram": {
+    "correct":"9/9",
+    "relative_error_order":"1e-15",
+    "n1048576_edits64_speedup":4873.959038267635,
+    "n1048576_edits1024_speedup":485.07317995619985,
+    "n1048576_edits16384_speedup":33.27921910566424,
+    "n65536_fraction025_speedup":2.14
+  },
+  "woodbury_inverse": {
+    "correct":"9/9",
+    "relative_error_order":"1e-15",
+    "best_speedup":28.0,
+    "d2048_rank2_to_32_speedup_range":[19.0,27.0]
+  },
+  "woodbury_solve": {
+    "correct":"18/18",
+    "residual_order":"1e-14",
+    "d2048_rank8_rhs1_speedup":3428.359255619576,
+    "d2048_rank8_rhs16_speedup":1644.0,
+    "d2048_rank8_rhs64_speedup":542.0,
+    "rank32_speedup_range":[428.0,1526.0]
+  },
+  "sparse_fft": {
+    "correct":"9/9",
+    "relative_error_range":"1e-14..1e-13",
+    "n1048576_edits4_speedup":18.062333762275504,
+    "n1048576_edits16_speedup":11.187307325631215
+  },
+  "lowrank_logdet": {
+    "correct":"9/9",
+    "best_speedup":309.0,
+    "d2048_rank2_speedup":309.0,
+    "d2048_rank8_speedup":193.0,
+    "d2048_rank32_speedup":144.0
+  },
+  "composed_statistics_prepared_delta": {
+    "correct":"6/6",
+    "best_speedup":67011.69494307219,
+    "n1048576_d256_edits4_speedup":52673.5403512242,
+    "n1048576_d256_edits16_speedup":22474.7536908078
+  },
+  "composed_statistics_full_end_to_end": {
+    "correct":"6/6",
+    "n262144":{"edits1":831.0,"edits4":1057.0,"edits16":795.0},
+    "n1048576":{"edits1":4584.693118558627,"edits4":3751.6156345980617,"edits16":3017.2308834004452}
+  },
+  "rbf_kernel_update": {
+    "correct":"9/9",
+    "n8192_edits1_speedup":720.0,
+    "n8192_edits8_speedup":144.0,
+    "n8192_edits64_speedup":15.3,
+    "n4096_edits1_speedup":545.0
+  },
+  "rbf_kernel_to_solve": {
+    "correct":"9/9",
+    "residual_order":"1e-14",
+    "n512_speedup_range":[22.0,71.0],
+    "n1024_speedup_range":[47.0,167.0],
+    "n2048":{"edits1":382.0,"edits4":291.0,"edits16":132.0},
+    "n4096_status":"next run announced; result not supplied yet"
+  }
+}
