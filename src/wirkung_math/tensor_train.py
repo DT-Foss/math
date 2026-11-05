@@ -28,7 +28,6 @@ class TensorTrain:
             elif rtol>0:
                 rank=max(1,int(np.count_nonzero(s>s[0]*rtol)))
             else:
-                # Exact numerical rank at machine precision.
                 threshold=np.finfo(np.float64).eps*max(matrix.shape)*s[0]
                 rank=max(1,int(np.count_nonzero(s>threshold)))
             if max_rank is not None:
@@ -82,10 +81,9 @@ class TensorTrain:
         return np.einsum("a,aib->i",state,final,optimize=True)
 
     def reconstruct(self)->np.ndarray:
-        value=self.cores[0]
-        # [1,n1,r1] -> [n1,r1]
-        value=value[0]
+        value=self.cores[0][0]
         for core in self.cores[1:]:
             value=np.einsum("...a,aib->...ib",value,core,optimize=True)
-            value=value[...,0] if core.shape[2]==1 else value
-        return np.asarray(value).reshape(self.shape)
+        if value.shape[-1]!=1:
+            raise RuntimeError("invalid terminal TT rank")
+        return np.asarray(value[...,0]).reshape(self.shape)
