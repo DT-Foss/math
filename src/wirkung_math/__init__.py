@@ -27,6 +27,7 @@ from .cacheless_local import LocalGraphDependency, LocalResidencyChoice, LocalRe
 from .lazy_normalized import LazyNormalizedKVState
 from .lifetime import ExecutionRegime, HorizonPlanner
 from .demand_linear import sparse_requested_linear_delta
+from .plan_graph import PlanTransition, PlanResult, RepresentationPlanGraph
 from .hardware_router import (
     ConsumerAwareKernelRouter, ConsumerRequirement, DirtyV100Calibration,
     KernelMaterializationCalibration, KernelSolveCalibration,
@@ -55,6 +56,7 @@ __all__ = [
     "LowRankUpdateLedger","IncrementalWoodburyLedger",
     "LocalGraphDependency","LocalResidencyChoice","LocalResidencyPlanner",
     "LazyNormalizedKVState","ExecutionRegime","HorizonPlanner","sparse_requested_linear_delta",
+    "PlanTransition","PlanResult","RepresentationPlanGraph",
     "ConsumerAwareKernelRouter","ConsumerRequirement","DirtyV100Calibration",
     "KernelMaterializationCalibration","KernelSolveCalibration",
     "SparseSpectrumV100Calibration","NormalizedQueryV100Calibration",
