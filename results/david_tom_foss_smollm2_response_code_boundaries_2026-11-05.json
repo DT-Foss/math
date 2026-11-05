@@ -1,0 +1,25 @@
+{
+  "source": "David Tom Foss Hugging Face CPU-performance jobs 6aecff9ec78863f9c633a8f1 and 6aed00160e0338d1bb80bdf4, 2026-11-05",
+  "model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+  "parameters": 134515008,
+  "activation_space_product_codes": {
+    "configurations": ["block8/code8", "block16/code16", "block32/code16"],
+    "observed_changed_block_fraction_range": [0.56, 0.73],
+    "observed_relative_l2_error_range": [0.43, 0.75],
+    "response_replay_speedup_range": [0.53, 0.61],
+    "routed_speedup": 1.0,
+    "conclusion": "Post-hoc nearest-centroid activation VQ neither generalizes nor produces a profitable temporal transition rate on held-out real states. Static activation reconstruction is the wrong training objective."
+  },
+  "consumer_quotient_down_projection": {
+    "layers": 30,
+    "configurations": ["block16/code16", "block32/code16"],
+    "dense_down_replay_ms": 112.0577,
+    "quotient_transition_ms_range": [55.9, 58.9],
+    "transition_speedup_range": [1.90, 2.00],
+    "quotient_route_layers_range": [28, 29],
+    "heldout_output_relative_l2_error_median": 0.8009,
+    "changed_block_fraction_median": 0.7786,
+    "conclusion": "Consumer-space state transitions are computationally profitable, but a K=16 post-hoc codebook is far below the required fidelity. The representation must be trained jointly with the upstream gate/up producer so the producer emits quotient codes directly."
+  },
+  "positive_result": "Consumer quotienting is validated as an execution primitive: once codes exist, down-projection state updates are about 2x faster on the real model. The remaining problem is code formation, now moved into model/codec co-design rather than runtime arithmetic."
+}
