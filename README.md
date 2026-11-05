@@ -15,6 +15,12 @@ The goal is not to make a CPU imitate a GPU kernel-by-kernel. The goal is to rep
 - a cost router for full vs sparse vs sparse×low-rank execution;
 - a `DirtyGraphCompiler` that compiles dirty support into optimal local tiles;
 - exact cached global-reduction / projected-reduction delta consumers;
+- FP64 sufficient-statistics state for moments, Gram/covariance and normal equations;
+- shared Woodbury state for solve/logdet/inverse-action fanout;
+- implicit row/column low-rank updates for pairwise kernels;
+- Cholesky update/downdate and Schur block insert/delete routes;
+- sparse DFT and dynamic butterfly-DAG reference paths;
+- a typed representation-switching delta IR;
 - E172–E177 plus E186–E187 executable experiments, with E185 CPU-box provenance;
 - regression tests for every exact rewrite;
 - machine-readable result records.
@@ -70,4 +76,4 @@ Executable verification in this repository:
 - E186 learns a 167.55-cell merge/split crossover and drives an optimal component partitioner;
 - E187 preserves the dirty-path gain through global consumers: 649.36× cached sum update and 448.87× projected update on the recorded VM run.
 
-See `docs/RESULTS.md` and `results/` for the full records.
+See `docs/INCREMENTAL_ALGEBRA.md` for the unified model, and `docs/RESULTS.md` / `results/` for full provenance.

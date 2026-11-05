@@ -169,3 +169,103 @@ Independent executable check on the ChatGPT VM (AMD EPYC 9V74, Float64), n=13107
 - max absolute differences: 1.36e-12 and 9.09e-12 respectively.
 
 This closes the local-to-global path without throwing away the dirty-graph gain at the first global consumer.
+
+
+## Extended CPU-box breakthrough round — 2026-11-05
+
+Machine-readable provenance: `results/imported_cpu_box_extended_2026-11-05.json`.
+
+### Sparse × low-rank and lazy propagation
+
+- 27/27 sparse×low-rank cases correct.
+- Selected supplied cases: 16.20× (n=8192,e=64,r=4), 12.34× (e=256,r=16), 6.21× (e=1024,r=4), and 1.85× even at 50% changed rows for n=2048,r=4.
+- Global 100%-row low-rank updates remained profitable for r<d; the materialized-output route crossed near r=d.
+- Lazy factor propagation through eight linear operators reached 7.20× at n=8192,d=512 and 6.53× even at rank 64.
+- With a narrow consumer, the composed linear path reached 105.22×.
+- A paired 20-round ABBA replication of the strongest point measured median 75.35×.
+- Against a fully precompiled full linear map, the additional low-rank-delta contribution remained up to 3.54×. Both gains remain part of the composed execution path.
+
+### Dirty nonlinear graph
+
+- Thread-envelope routing: 697× for patch 1, 587× for patch 8, 286× for patch 64.
+- End-to-end through a global consumer: up to 601.5× / 502.8× / 171.5× for patches 1/8/64.
+- FP64 cached global statistics retained 533.9× / 507.0× / 239.5× with max relative error 1.34e-11.
+
+### Incremental sufficient statistics
+
+Corrected same-input FP32/FP64 moment run: 9/9 correct, max error ~1.5e-14.
+
+At n=1,048,576,d=64:
+- 64 row edits: **9,117×**
+- 1,024 edits: **1,066×**
+- 16,384 edits: **73.3×**
+
+Incremental Gram/covariance: 9/9 correct, relative errors ~1e-15.
+
+At n=1,048,576,d=64:
+- 64 edits: **4,874×**
+- 1,024 edits: **485×**
+- 16,384 edits: **33.3×**
+
+### Low-rank matrix state
+
+Woodbury inverse update:
+- 9/9 correct;
+- best 28×;
+- d=2048,r=2..32 remained about 19–27×.
+
+Direct cached-solve update:
+- 18/18 correct, residuals ~1e-14;
+- d=2048,r=8: **3,428×** for one RHS, **1,644×** for 16 RHS, **542×** for 64 RHS;
+- rank 32 remained roughly 428–1,526×.
+
+Low-rank logdet:
+- 9/9 correct;
+- d=2048: 309× at rank 2, 193× at rank 8, 144× at rank 32.
+
+### Composed statistics pipeline
+
+One row-change delta feeds Gram + solve + logdet.
+
+Prepared-delta application:
+- 6/6 correct;
+- up to **67,012×**;
+- n=1,048,576,d=256,e=16 still **22,475×**.
+
+Full delta creation + all downstream consumers:
+- 6/6 correct;
+- n=262,144: 831× / 1,057× / 795× for e=1/4/16;
+- n=1,048,576: **4,585× / 3,752× / 3,017×** for e=1/4/16.
+
+### Sparse Fourier updates
+
+- 9/9 correct, relative error 1e-14..1e-13.
+- n=1,048,576: 18.1× for 4 edits and 11.2× for 16 edits.
+
+### Nonlinear pairwise kernel
+
+RBF matrix update:
+- 9/9 correct;
+- n=8192: **720×** for 1 changed point, 144× for 8, 15.3× for 64.
+
+RBF -> dynamic solve:
+- 9/9 correct, residuals ~1e-14;
+- n=512: 22–71×;
+- n=1024: 47–167×;
+- n=2048: **382× / 291× / 132×** for e=1/4/16.
+- n=4096 was announced as the next CPU-box point; no result was supplied yet.
+
+
+## ChatGPT VM cross-check — dynamic normalized bilinear state
+
+Machine-readable record: `results/chatgpt_vm_dynamic_bilinear_2026-11-05.json`.
+
+AMD EPYC 9V74, NumPy/OpenBLAS 5 threads, FP32, d=64. Cached old Q/K/V output and log-partitions are persistent state; setup/state copies were excluded from the timed update.
+
+- n=1024: 51.37× / 15.80× / 1.86× for e=1/8/64.
+- n=2048: 32.31× / 28.82× / 15.57×.
+- n=4096: **86.57× / 38.46× / 11.81×**.
+- zero clean-row fallbacks in all nine random cases.
+- max absolute output error <= 2.95e-7.
+
+This composes pairwise row/column change geometry with the normalized sufficient-statistic state rather than rebuilding the full n×n bilinear map.

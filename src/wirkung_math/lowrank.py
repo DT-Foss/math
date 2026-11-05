@@ -47,6 +47,10 @@ class FactorDelta:
     def materialize(self) -> np.ndarray:
         return self.left @ self.right.T
 
+    def materialize_block(self, rows, cols) -> np.ndarray:
+        """Materialize only a requested output block."""
+        return self.left[rows] @ self.right[cols].T
+
     def compose_right(self, W: np.ndarray) -> "FactorDelta":
         """Propagate ΔX through X -> XW exactly: Δ(XW)=left @ (W.T@right).T."""
         if W.shape[0] != self.right.shape[0]:
