@@ -1,13 +1,31 @@
 {
-  "tool":"wirkung-remath",
-  "version":"0.1.0",
-  "upstream_snapshot_commit":"7fed349",
-  "verification":{"tests_passed":22,"tests_total":22,"release_receipt_offline":true,"native_synthesis_ready_linux":true},
-  "source_policy":{"raw_archive_committed":false,"secret_scan":"clean","excluded":[".git","caches","generated reports","sqlite traces","compiled dylib","build artifacts"]},
-  "release_sha256":{
-    "wheel":"2deebfcc0e62cacf1afba20707d6ad667a07699977a7548340480e54ea54d61f",
-    "sdist":"5df3426cb95c56cd600ea460182c0631364e3d8d44a1305263cab7b34c92a7ec",
-    "npm":"5bcdc428124147774182b5e359b918631ca589b4e9d935e6a6ffeda025283d1d",
-    "portability_patch":"5e67cae3afe681e6ee002a4e1771f152d1f4c589244fddd4eae7ef1d8472bd2f"
-  }
+  "tool": "wirkung-remath",
+  "version": "0.1.0",
+  "upstream_snapshot_commit": "7fed349",
+  "verification": {
+    "tests_passed": 22,
+    "tests_total": 22,
+    "release_receipt_offline": true,
+    "native_synthesis_ready_linux": true
+  },
+  "source_policy": {
+    "raw_archive_committed": false,
+    "secret_scan": "clean",
+    "excluded": [
+      ".git",
+      "caches",
+      "generated reports",
+      "sqlite traces",
+      "compiled dylib",
+      "build artifacts"
+    ]
+  },
+  "release_sha256": {
+    "wheel": "2deebfcc0e62cacf1afba20707d6ad667a07699977a7548340480e54ea54d61f",
+    "sdist": "5df3426cb95c56cd600ea460182c0631364e3d8d44a1305263cab7b34c92a7ec",
+    "npm": "5bcdc428124147774182b5e359b918631ca589b4e9d935e6a6ffeda025283d1d",
+    "portability_patch": "5e67cae3afe681e6ee002a4e1771f152d1f4c589244fddd4eae7ef1d8472bd2f",
+    "clean_portable_zip": "c5e5b61a5678d42a3b591188dfc4aa8f3cecbf91907d121927280f61c91cdb28"
+  },
+  "clean_portable_zip_files": 41
 }
