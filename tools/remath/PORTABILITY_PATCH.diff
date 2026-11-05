@@ -1,0 +1,440 @@
+diff --git a/mathscope/adapters/native_bridge.py b/mathscope/adapters/native_bridge.py
+index 83d7f23..87c526c 100644
+--- a/mathscope/adapters/native_bridge.py
++++ b/mathscope/adapters/native_bridge.py
+@@ -9,7 +9,6 @@ from __future__ import annotations
+ 
+ import ctypes
+ import os
+-import subprocess
+ from typing import Any, Dict, List, Optional
+ import numpy as np
+ 
+@@ -17,6 +16,7 @@ from ..collector import MathScope, extract_tensor_descriptor
+ from ..adapters.numpy_adapter import _unwrap, _wrap
+ from ..schema import TensorDescriptor
+ from ..resources import resource_path
++from ..native_build import compile_shared, compiled_library_path
+ 
+ 
+ class _C_MathScopeNativeEvent(ctypes.Structure):
+@@ -42,19 +42,16 @@ class _C_MathScopeNativeEvent(ctypes.Structure):
+ 
+ class NativeCPUDARuntime:
+     """
+-    Bindings to the compiled `libcpuda_runtime.dylib` native C++ kernel library,
++    Bindings to the compiled `libcpuda_runtime` shared library native C++ kernel library,
+     with automatic hardware ring-buffer draining into `MathScope`.
+     """
+ 
+     def __init__(self, dylib_path: Optional[str] = None) -> None:
+         if dylib_path is None:
+             cpp_path = resource_path("native", "cpuda_runtime.cpp")
+-            dylib_path = os.path.join(os.path.dirname(cpp_path), "libcpuda_runtime.dylib")
++            dylib_path = compiled_library_path(os.path.dirname(cpp_path), "libcpuda_runtime")
+             if not os.path.exists(dylib_path) and os.path.exists(cpp_path):
+-                subprocess.run(
+-                    ["/usr/bin/clang++", "-O3", "-std=c++17", "-shared", "-fPIC", cpp_path, "-o", dylib_path],
+-                    check=True,
+-                )
++                compile_shared(cpp_path, dylib_path)
+ 
+         self.dylib_path = dylib_path
+         self.lib = ctypes.CDLL(self.dylib_path)
+diff --git a/mathscope/cli.py b/mathscope/cli.py
+index c081241..165641c 100644
+--- a/mathscope/cli.py
++++ b/mathscope/cli.py
+@@ -12,6 +12,7 @@ Commands:
+ from __future__ import annotations
+ 
+ import argparse
++import ctypes.util
+ from importlib.metadata import PackageNotFoundError, version as distribution_version
+ import json
+ import os
+@@ -47,12 +48,16 @@ def remath_version() -> str:
+ 
+ 
+ def doctor_report() -> dict[str, object]:
+-    compiler = shutil.which("clang++")
++    compiler = shutil.which(os.environ.get("CXX", "")) if os.environ.get("CXX") else None
++    compiler = compiler or shutil.which("clang++") or shutil.which("g++") or shutil.which("c++")
+     header = resource_path("include", "mathscope_trace.h")
+     native_source = resource_path("native", "cpuda_runtime.cpp")
+-    is_macos = platform.system() == "Darwin"
++    system = platform.system()
++    is_macos = system == "Darwin"
+     accelerate = "/System/Library/Frameworks/Accelerate.framework"
+     has_accelerate = is_macos and os.path.exists(accelerate)
++    has_linux_blas = system == "Linux" and ctypes.util.find_library("blas") is not None
++    native_ready = bool(compiler and (has_accelerate or has_linux_blas))
+     return {
+         "version": remath_version(),
+         "platform": {"system": platform.system(), "machine": platform.machine()},
+@@ -61,7 +66,7 @@ def doctor_report() -> dict[str, object]:
+         "compiler": compiler,
+         "accelerate": has_accelerate,
+         "resources": {"header": header, "native_source": native_source},
+-        "native_synthesis_ready": bool(is_macos and compiler and has_accelerate),
++        "native_synthesis_ready": native_ready,
+     }
+ 
+ 
+diff --git a/mathscope/electroweave.py b/mathscope/electroweave.py
+index 7dde698..f199718 100644
+--- a/mathscope/electroweave.py
++++ b/mathscope/electroweave.py
+@@ -37,6 +37,7 @@ from .collector import MathScope, extract_tensor_descriptor
+ from .epistemic import audit_trace_epistemic_efficiency
+ from .schema import ExecutionTrace
+ from .resources import resource_dir
++from .native_build import compile_shared, compiled_library_path
+ 
+ 
+ @dataclass
+@@ -709,8 +710,14 @@ _STAGE6_ELECTROWEAVE_CPP_SOURCE = r"""// =======================================
+ #include <chrono>
+ #include <vector>
+ #define ACCELERATE_NEW_LAPACK 1
++#ifdef __APPLE__
+ #include <Accelerate/Accelerate.h>
++#else
++#include <cblas.h>
++#endif
++#if defined(__ARM_NEON) || defined(__aarch64__)
+ #include <arm_neon.h>
++#endif
+ #include "mathscope_trace.h"
+ 
+ static MathScopeNativeEvent g_ew6_ring[1024];
+@@ -856,6 +863,7 @@ void electroweave_stage6_dual_rail_morphism_f32(
+     // inside FOUR 128-bit ARM NEON registers (c0, c1, c2, c3) with ZERO L1/DRAM
+     // intermediate writes, followed by Horner Lambert Padé [5/5] rational tanh!
+     // ------------------------------------------------------------------------
++#if defined(__ARM_NEON) || defined(__aarch64__)
+     float32x4_t c_reg[4];
+     for (int32_t r = 0; r < 4; ++r) {
+         const float* __restrict__ vt_row = lora_vt_r + (r * L);
+@@ -884,6 +892,29 @@ void electroweave_stage6_dual_rail_morphism_f32(
+         res = vfmaq_n_f32(res, c3, u_row[3]);
+         vst1q_f32(out_lora + (l * 4), res);
+     }
++#else
++    // Portable scalar fallback preserving the exact rank-4 / width-4 Krylov algebra.
++    float c_reg[4][4] = {{0.0f}};
++    for (int32_t r = 0; r < 4; ++r) {
++        const float* __restrict__ vt_row = lora_vt_r + (r * L);
++        for (int32_t l = 0; l < L; ++l) {
++            const float coeff = vt_row[l];
++            const float* __restrict__ ts = token_slice + (l * 4);
++            c_reg[r][0] += coeff * ts[0];
++            c_reg[r][1] += coeff * ts[1];
++            c_reg[r][2] += coeff * ts[2];
++            c_reg[r][3] += coeff * ts[3];
++        }
++    }
++    for (int32_t l = 0; l < L; ++l) {
++        const float* __restrict__ u_row = lora_u_r + (l * 4);
++        for (int32_t p = 0; p < 4; ++p) {
++            out_lora[l * 4 + p] =
++                u_row[0] * c_reg[0][p] + u_row[1] * c_reg[1][p] +
++                u_row[2] * c_reg[2][p] + u_row[3] * c_reg[3][p];
++        }
++    }
++#endif
+ 
+     const int32_t total_sd = S * D;
+     #pragma clang loop vectorize(enable)
+@@ -944,32 +975,14 @@ class Stage6ElectroWeaveRuntime:
+     def __init__(self, out_dir: str) -> None:
+         os.makedirs(out_dir, exist_ok=True)
+         self.cpp_path = os.path.join(out_dir, "synthesized_stage6_electroweave_holo.cpp")
+-        self.dylib_path = os.path.join(out_dir, "libstage6_electroweave_holo.dylib")
++        self.dylib_path = compiled_library_path(out_dir, "libstage6_electroweave_holo")
+         include_dir = resource_dir("include")
+ 
+         with open(self.cpp_path, "w", encoding="utf-8") as f:
+             f.write(_STAGE6_ELECTROWEAVE_CPP_SOURCE)
+ 
+         t0 = time.perf_counter_ns()
+-        subprocess.run(
+-            [
+-                "/usr/bin/clang++",
+-                "-O3",
+-                "-ffast-math",
+-                "-mcpu=native",
+-                "-std=c++17",
+-                "-DACCELERATE_NEW_LAPACK",
+-                "-framework",
+-                "Accelerate",
+-                f"-I{include_dir}",
+-                "-shared",
+-                "-fPIC",
+-                self.cpp_path,
+-                "-o",
+-                self.dylib_path,
+-            ],
+-            check=True,
+-        )
++        compile_shared(self.cpp_path, self.dylib_path, include_dirs=[include_dir], use_blas=True, fast_math=True)
+         self.compile_time_ms = round((time.perf_counter_ns() - t0) / 1e6, 2)
+ 
+         self.lib = ctypes.CDLL(self.dylib_path)
+diff --git a/mathscope/holo_engine.py b/mathscope/holo_engine.py
+index 44a5987..fe5c58b 100644
+--- a/mathscope/holo_engine.py
++++ b/mathscope/holo_engine.py
+@@ -40,6 +40,7 @@ from .collector import MathScope, extract_tensor_descriptor
+ from .epistemic import audit_trace_epistemic_efficiency
+ from .schema import ExecutionTrace
+ from .resources import resource_dir
++from .native_build import compile_shared, compiled_library_path
+ 
+ 
+ @dataclass
+@@ -206,7 +207,11 @@ _HOLO_CPP_SOURCE = r"""/*
+ #include <chrono>
+ #include <vector>
+ #define ACCELERATE_NEW_LAPACK 1
++#ifdef __APPLE__
+ #include <Accelerate/Accelerate.h>
++#else
++#include <cblas.h>
++#endif
+ #include "mathscope_trace.h"
+ 
+ static MathScopeNativeEvent g_holo_ring[1024];
+@@ -472,32 +477,14 @@ class HoloCompiledRuntime:
+     def __init__(self, out_dir: str) -> None:
+         os.makedirs(out_dir, exist_ok=True)
+         self.cpp_path = os.path.join(out_dir, "synthesized_holo_megakernel.cpp")
+-        self.dylib_path = os.path.join(out_dir, "libholo_synthesized.dylib")
++        self.dylib_path = compiled_library_path(out_dir, "libholo_synthesized")
+         include_dir = resource_dir("include")
+ 
+         with open(self.cpp_path, "w", encoding="utf-8") as f:
+             f.write(_HOLO_CPP_SOURCE)
+ 
+         t0 = time.perf_counter_ns()
+-        subprocess.run(
+-            [
+-                "/usr/bin/clang++",
+-                "-O3",
+-                "-ffast-math",
+-                "-mcpu=native",
+-                "-std=c++17",
+-                "-DACCELERATE_NEW_LAPACK",
+-                "-framework",
+-                "Accelerate",
+-                f"-I{include_dir}",
+-                "-shared",
+-                "-fPIC",
+-                self.cpp_path,
+-                "-o",
+-                self.dylib_path,
+-            ],
+-            check=True,
+-        )
++        compile_shared(self.cpp_path, self.dylib_path, include_dirs=[include_dir], use_blas=True, fast_math=True)
+         self.compile_time_ms = round((time.perf_counter_ns() - t0) / 1e6, 2)
+ 
+         self.lib = ctypes.CDLL(self.dylib_path)
+diff --git a/mathscope/morph_engine.py b/mathscope/morph_engine.py
+index e313791..5b40ce6 100644
+--- a/mathscope/morph_engine.py
++++ b/mathscope/morph_engine.py
+@@ -33,6 +33,7 @@ from .collector import MathScope, extract_tensor_descriptor
+ from .epistemic import audit_trace_epistemic_efficiency
+ from .schema import ExecutionTrace
+ from .resources import resource_dir
++from .native_build import compile_shared, compiled_library_path
+ 
+ 
+ @dataclass
+@@ -133,7 +134,11 @@ _SYNTHESIZED_CPP_SOURCE = r"""/*
+ 
+ #define ACCELERATE_NEW_LAPACK 1
+ #include "../include/mathscope_trace.h"
++#ifdef __APPLE__
+ #include <Accelerate/Accelerate.h>
++#else
++#include <cblas.h>
++#endif
+ #include <chrono>
+ #include <cmath>
+ #include <cstring>
+@@ -451,32 +456,14 @@ class MorphicCompiledRuntime:
+     def __init__(self, out_dir: str) -> None:
+         os.makedirs(out_dir, exist_ok=True)
+         self.cpp_path = os.path.join(out_dir, "synthesized_morphic_kernels.cpp")
+-        self.dylib_path = os.path.join(out_dir, "libmorphic_synthesized.dylib")
++        self.dylib_path = compiled_library_path(out_dir, "libmorphic_synthesized")
+         include_dir = resource_dir("include")
+ 
+         with open(self.cpp_path, "w", encoding="utf-8") as f:
+             f.write(_SYNTHESIZED_CPP_SOURCE)
+ 
+         t0 = time.perf_counter_ns()
+-        subprocess.run(
+-            [
+-                "/usr/bin/clang++",
+-                "-O3",
+-                "-ffast-math",
+-                "-mcpu=native",
+-                "-std=c++17",
+-                "-DACCELERATE_NEW_LAPACK",
+-                "-framework",
+-                "Accelerate",
+-                f"-I{include_dir}",
+-                "-shared",
+-                "-fPIC",
+-                self.cpp_path,
+-                "-o",
+-                self.dylib_path,
+-            ],
+-            check=True,
+-        )
++        compile_shared(self.cpp_path, self.dylib_path, include_dirs=[include_dir], use_blas=True, fast_math=True)
+         self.compile_time_ms = round((time.perf_counter_ns() - t0) / 1e6, 2)
+ 
+         self.lib = ctypes.CDLL(self.dylib_path)
+diff --git a/mathscope/tensor_tomography.py b/mathscope/tensor_tomography.py
+index a76bbdc..80001b5 100644
+--- a/mathscope/tensor_tomography.py
++++ b/mathscope/tensor_tomography.py
+@@ -27,6 +27,7 @@ from .collector import MathScope, extract_tensor_descriptor
+ from .epistemic import audit_trace_epistemic_efficiency
+ from .schema import ExecutionTrace
+ from .resources import resource_dir
++from .native_build import compile_shared, compiled_library_path
+ 
+ 
+ @dataclass
+@@ -451,7 +452,11 @@ _STAGE5_CPP_SOURCE = r"""/*
+ #include <chrono>
+ #include <vector>
+ #define ACCELERATE_NEW_LAPACK 1
++#ifdef __APPLE__
+ #include <Accelerate/Accelerate.h>
++#else
++#include <cblas.h>
++#endif
+ #include "mathscope_trace.h"
+ 
+ static MathScopeNativeEvent g_s5_ring[1024];
+@@ -641,32 +646,14 @@ class Stage5SubspaceRuntime:
+     def __init__(self, out_dir: str) -> None:
+         os.makedirs(out_dir, exist_ok=True)
+         self.cpp_path = os.path.join(out_dir, "synthesized_stage5_subspace_holo.cpp")
+-        self.dylib_path = os.path.join(out_dir, "libstage5_subspace_holo.dylib")
++        self.dylib_path = compiled_library_path(out_dir, "libstage5_subspace_holo")
+         include_dir = resource_dir("include")
+ 
+         with open(self.cpp_path, "w", encoding="utf-8") as f:
+             f.write(_STAGE5_CPP_SOURCE)
+ 
+         t0 = time.perf_counter_ns()
+-        subprocess.run(
+-            [
+-                "/usr/bin/clang++",
+-                "-O3",
+-                "-ffast-math",
+-                "-mcpu=native",
+-                "-std=c++17",
+-                "-DACCELERATE_NEW_LAPACK",
+-                "-framework",
+-                "Accelerate",
+-                f"-I{include_dir}",
+-                "-shared",
+-                "-fPIC",
+-                self.cpp_path,
+-                "-o",
+-                self.dylib_path,
+-            ],
+-            check=True,
+-        )
++        compile_shared(self.cpp_path, self.dylib_path, include_dirs=[include_dir], use_blas=True, fast_math=True)
+         self.compile_time_ms = round((time.perf_counter_ns() - t0) / 1e6, 2)
+ 
+         self.lib = ctypes.CDLL(self.dylib_path)
+diff --git a/npm/remath/bin/remath.js b/npm/remath/bin/remath.js
+index fafa4b7..0b0fe7e 100755
+--- a/npm/remath/bin/remath.js
++++ b/npm/remath/bin/remath.js
+@@ -31,16 +31,34 @@ function install() {
+ 
+   let result;
+   if (uv) {
+-    result = run(uv, ['venv', '--python', '3.13', part]);
+-    if (result.status === 0) result = run(uv, ['pip', 'install', '--python', partPy, pkg]);
++    const localWheel = Boolean(process.env.REMATH_WHEEL);
++    const venvArgs = ['venv', '--python', '3.13'];
++    if (localWheel) venvArgs.push('--system-site-packages');
++    venvArgs.push(part);
++    result = run(uv, venvArgs);
++    if (result.status === 0) {
++      const pipArgs = ['pip', 'install', '--python', partPy];
++      if (localWheel) pipArgs.push('--no-deps');
++      pipArgs.push(pkg);
++      result = run(uv, pipArgs);
++    }
+   } else {
+     const py = process.env.REMATH_PYTHON || which('python3.13');
+     if (!py) {
+       console.error('remath needs Python 3.13 on PATH or uv (https://docs.astral.sh/uv/).');
+       return false;
+     }
+-    result = run(py, ['-m', 'venv', part]);
+-    if (result.status === 0) result = run(partPy, ['-m', 'pip', 'install', '-q', pkg]);
++    const localWheel = Boolean(process.env.REMATH_WHEEL);
++    const venvArgs = ['-m', 'venv'];
++    if (localWheel) venvArgs.push('--system-site-packages');
++    venvArgs.push(part);
++    result = run(py, venvArgs);
++    if (result.status === 0) {
++      const pipArgs = ['-m', 'pip', 'install', '-q'];
++      if (localWheel) pipArgs.push('--no-deps');
++      pipArgs.push(pkg);
++      result = run(partPy, pipArgs);
++    }
+   }
+   if (!result || result.status !== 0) {
+     console.error(`remath ${VERSION}: runtime installation failed; no final runtime was activated.`);
+diff --git a/scripts/build_release_receipt.sh b/scripts/build_release_receipt.sh
+index 6f58557..9c4c247 100755
+--- a/scripts/build_release_receipt.sh
++++ b/scripts/build_release_receipt.sh
+@@ -8,7 +8,6 @@ if [[ "$OUT_ARG" = /* ]]; then
+ else
+   OUT_DIR="$ROOT_DIR/$OUT_ARG"
+ fi
+-UV_BIN="${UV_BIN:-$(command -v uv)}"
+ PYTHON_BIN="${PYTHON_BIN:-$(command -v python3)}"
+ TMP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/remath-release.XXXXXX")"
+ trap 'rm -rf "$TMP_DIR"' EXIT
+@@ -18,15 +17,22 @@ OUT_DIR="$(cd "$OUT_DIR" && pwd -P)"
+ 
+ cd "$ROOT_DIR"
+ "$PYTHON_BIN" -m pytest -q --ignore=tests/test_release_receipt.py > "$OUT_DIR/python-tests.log"
+-"$UV_BIN" build --out-dir "$OUT_DIR/dist" > "$OUT_DIR/python-build.log"
++"$PYTHON_BIN" - "$OUT_DIR/dist" > "$OUT_DIR/python-build.log" <<'PYBUILD'
++import pathlib, sys
++import setuptools.build_meta as backend
++out = pathlib.Path(sys.argv[1])
++out.mkdir(parents=True, exist_ok=True)
++print(backend.build_sdist(str(out)))
++print(backend.build_wheel(str(out)))
++PYBUILD
+ 
+ WHEEL="$(find "$OUT_DIR/dist" -maxdepth 1 -name 'wirkung_remath-0.1.0-*.whl' -print -quit)"
+ SDIST="$(find "$OUT_DIR/dist" -maxdepth 1 -name 'wirkung_remath-0.1.0.tar.gz' -print -quit)"
+ test -n "$WHEEL" && test -n "$SDIST"
+ 
+-"$UV_BIN" venv --python 3.13 "$TMP_DIR/venv" > "$OUT_DIR/venv-create.log"
++"$PYTHON_BIN" -m venv --system-site-packages "$TMP_DIR/venv" > "$OUT_DIR/venv-create.log"
+ VENV_PY="$TMP_DIR/venv/bin/python"
+-"$UV_BIN" pip install --python "$VENV_PY" "$WHEEL" > "$OUT_DIR/wheel-install.log"
++"$VENV_PY" -m pip install --no-deps "$WHEEL" > "$OUT_DIR/wheel-install.log"
+ (cd "$TMP_DIR" && "$VENV_PY" -m mathscope.cli --version) > "$OUT_DIR/wheel-version.log"
+ (cd "$TMP_DIR" && "$VENV_PY" -m mathscope.cli doctor --json) > "$OUT_DIR/wheel-doctor.json"
