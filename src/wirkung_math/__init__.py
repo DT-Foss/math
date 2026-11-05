@@ -15,6 +15,7 @@ from .spectral import SparseDFTState, ButterflyFFTState
 from .cholesky import CholeskyState
 from .block import BlockAppendCache, delete_trailing_block_from_inverse
 from .delta_ir import DeltaDescriptor, Structure
+from .bilinear import DynamicNormalizedBilinearState, full_normalized_bilinear
 
 __all__ = [
     "FactorDelta","crossover_rank","effective_edits","sparse_lowrank_update",
@@ -29,4 +30,5 @@ __all__ = [
     "SparseDFTState","ButterflyFFTState","CholeskyState",
     "BlockAppendCache","delete_trailing_block_from_inverse",
     "DeltaDescriptor","Structure",
+    "DynamicNormalizedBilinearState","full_normalized_bilinear",
 ]
