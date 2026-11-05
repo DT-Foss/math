@@ -113,3 +113,59 @@ QR + small-core SVD recovered rank 8 without dense materialization:
 - 10.35× faster subsequent materialization in the recorded run;
 - 12.46× in the preceding run;
 - max absolute error: 2.56e-12.
+
+
+## Imported E185–E187 dirty-graph results — CPU box, 2026-11-05
+
+Machine-readable provenance: `results/imported_e185_e187.json`.
+
+### E185 — connected-component dirty tiling
+
+Across 24 nonlinear residual layers, preserving disconnected dirty components as separate cones produced:
+
+- 2 separated changes: **196.6× vs full recomputation**, **3.68× vs one bounding rectangle**;
+- 4 changes: **100.4× vs full**, **55.6× vs bounding rectangle**;
+- 8 changes: **50.9× vs full**, **28.0× vs bounding rectangle**;
+- all three cases correct.
+
+The operational state is therefore geometric: a dirty set is represented by its connected components and propagated cones, rather than by a single enclosing rectangle.
+
+### E186 — component merge scheduler
+
+Measured two-component routing:
+
+- gaps 0–128: merge;
+- gaps 256–384: keep separate;
+- at gap 128: 8.996 ms merged vs 9.002 ms tiled;
+- at gap 256: 11.583 ms merged vs 9.054 ms tiled;
+- at gap 384: 13.024 ms merged vs 9.749 ms tiled.
+
+Fitted law:
+
+`T_merge(g) = 5.8224 ms + 0.0204997 ms * g`
+
+with R²=0.9596 and median tiled cost 9.2571 ms.
+
+This yields an inferred marginal second-tile launch/scheduling cost of about 3.4347 ms and an automatic crossover gap of **167.55 cells**.
+
+The runtime implementation generalizes this to arbitrary component sets with a dynamic-programming partitioner minimizing:
+
+`launch_cost * tile_count + cell_cost * total_processed_hull_width`.
+
+### E187 — local dirty graph into global consumer
+
+The exact update law is:
+
+`S' = S - sum(old_dirty) + sum(new_dirty)`.
+
+For a narrow projection `G=sum_i x_i W`, the runtime uses:
+
+`G' = G + sum(delta_dirty) W`.
+
+Independent executable check on the ChatGPT VM (AMD EPYC 9V74, Float64), n=131072, d=64, 256 dirty rows:
+
+- cached global sum update: **649.36×** vs full reduction;
+- cached 8-wide projected reduction: **448.87×** vs full reduction+projection;
+- max absolute differences: 1.36e-12 and 9.09e-12 respectively.
+
+This closes the local-to-global path without throwing away the dirty-graph gain at the first global consumer.
