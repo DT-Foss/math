@@ -1,0 +1,13 @@
+{
+  "source": "user-supplied CPU-box run, 2026-11-05",
+  "normalized_examples": [
+    {"n":2048,"edits":1,"speedup":69.97},
+    {"n":2048,"edits":8,"speedup":15.01},
+    {"n":2048,"edits":64,"speedup":0.76},
+    {"n":4096,"edits":64,"speedup":2.43},
+    {"n":8192,"edits":64,"speedup":5.34}
+  ],
+  "dirty_best_speedup": 301.6790216125622,
+  "lowrank_best_speedup": 2.453024153558968,
+  "initial_max_abs_error": 1.5e-8
+}
