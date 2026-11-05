@@ -60,3 +60,38 @@ The tile partition is solved globally with dynamic programming under
 The E186 calibration gives `launch_cost≈3.4347 ms` and `cell_cost≈0.0204997 ms/cell`, hence `gap*=167.55` for that executor.
 
 This representation lets nonlinear local layers retain sparse geometry even though low-rank structure may be destroyed by the nonlinearity.
+
+
+## Representation-switching compiler
+
+The runtime now treats delta structure as a typed intermediate representation.
+
+Typical transitions:
+
+- sparse-row + low-rank -> elementwise nonlinearity: preserve sparse row support, drop low-rank if necessary;
+- changed points -> pairwise symmetric operator: row/column support plus rank <= 2e;
+- dirty geometry -> additive global reduction: sufficient-statistic delta;
+- row replacement -> Gram: symmetric low-rank core;
+- Gram delta -> solve/logdet: shared Woodbury or Cholesky state;
+- sparse signal edit -> Fourier transform: response-basis or dirty-butterfly state.
+
+The goal is not to keep one representation alive forever. The goal is to choose the cheapest exact representation after each operator.
+
+## Shared downstream state
+
+A prepared low-rank matrix update is a reusable object. Expensive preparation such as `A^-1 U`, rank reveal, or a small Schur/Woodbury core is performed once and fans out to every dependent consumer.
+
+This is the architectural reason the composed statistics pipeline can be dramatically cheaper than benchmarking solve/logdet/inverse as unrelated operations.
+
+## Dynamic shape
+
+State transitions include replacement, insertion and deletion. Additive statistics handle these directly; pairwise/kernel systems use Schur-complement block updates.
+
+## Numerical lifetime
+
+Persistent states use precision and rebasing policies:
+
+- global additive statistics should accumulate in FP64;
+- long-lived sums can use compensated/hierarchical accumulation;
+- small Woodbury/Schur cores should expose condition estimates;
+- exact full rebasing is a routed maintenance operation triggered by conditioning/error budget.
