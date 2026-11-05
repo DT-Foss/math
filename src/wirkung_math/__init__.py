@@ -12,6 +12,7 @@ from .dirty import (
     update_global_sum,
     update_projected_global_sum,
 )
+from .compiler import DirtyGraphCompiler, DirtyPlan
 
 __all__ = [
     "FactorDelta", "crossover_rank", "effective_edits", "sparse_lowrank_update",
@@ -19,4 +20,5 @@ __all__ = [
     "rmsnorm_lowrank_update", "layernorm_lowrank_update", "route_linear_delta",
     "GeometryCostModel", "Interval", "connected_components", "dirty_cone_components",
     "schedule_components_optimal", "update_global_sum", "update_projected_global_sum",
+    "DirtyGraphCompiler", "DirtyPlan",
 ]
