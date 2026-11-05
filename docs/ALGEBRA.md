@@ -217,3 +217,52 @@ For `Delta X = AB^T`, a consumer requesting only rows `I` and columns `J` evalua
 without constructing the full delta.
 
 Implementation: `FactorDelta.materialize_block`.
+
+
+## A025 — Two-sided sparse linear response
+
+For `y=A x`, input edit support `U` and requested outputs `K`:
+
+`delta y_K = A[K,U] delta x_U`.
+
+Neither the full input response nor the full operator needs to be materialized if the requested block can be generated/fetched directly.
+
+Implementation: `demand_linear.sparse_requested_linear_delta`.
+
+## A026 — Deferred normalized-query reconciliation
+
+K/V edits are appended without eagerly touching every query row. Each requested row applies only outstanding edit batches to its stored normalized sufficient state. Stale rows may be invalidated when edit-log prefixes are compacted and rebuilt exactly on next access.
+
+Implementation: `lazy_normalized.LazyNormalizedKVState`.
+
+## A027 — Cacheless local reconstruction
+
+For a local graph of total receptive radius `R`, an edit patch side `p` has final dirty side `p+2R`. Exact reconstruction of that final dirty output requires only an input crop side `p+4R`.
+
+This trades two bounded local evaluations (old/new) for eliminating all dense intermediate activation state.
+
+Implementation: `cacheless_local.LocalGraphDependency`.
+
+## A028 — Lazy Gram / scatter representation
+
+For row replacements:
+
+`delta G = X_new^T X_new - X_old^T X_old = U V^T`.
+
+Keep `G = G_base + U_all V_all^T` rather than rewriting the dense matrix. Solve and logdet consume the shared streaming Woodbury core; arbitrary requested blocks use factor submatrices.
+
+Implementation: `lazy_gram.LazyGramState`.
+
+## A029 — Streaming determinant correction
+
+When the Woodbury core grows by a new block
+
+`M_new = [[M,A],[B,D]]`,
+
+with Schur complement `S=D-B M^-1 A`:
+
+`det(M_new)=det(M)det(S)`.
+
+Thus the determinant correction is updated during the same block append that updates `M^-1`; no independent factorization is required.
+
+Implementation: `update_ledger.IncrementalWoodburyLedger.logdet_update`.
