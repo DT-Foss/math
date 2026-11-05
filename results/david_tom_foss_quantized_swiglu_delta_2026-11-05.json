@@ -1,0 +1,13 @@
+{
+  "source": "David Tom Foss VM synthetic exact quantized-activation benchmark, 2026-11-05",
+  "shape": {"hidden": 14336, "down_output": 2560, "levels": 33, "dtype": "float32"},
+  "full_down_projection_ms": 28.619877,
+  "cases": [
+    {"gate_up_delta_std": 0.001, "changed_codes": 36, "changed_fraction": 0.0025111607142857145, "delta_projection_ms": 2.4388815, "speedup": 11.734837055428894},
+    {"gate_up_delta_std": 0.003, "changed_codes": 106, "changed_fraction": 0.007394252232142857, "delta_projection_ms": 5.7836985, "speedup": 4.94836945598046},
+    {"gate_up_delta_std": 0.01, "changed_codes": 325, "changed_fraction": 0.022670200892857144, "delta_projection_ms": 11.056749, "speedup": 2.5884531700954776},
+    {"gate_up_delta_std": 0.03, "changed_codes": 881, "changed_fraction": 0.06145368303571429, "delta_projection_ms": 37.090132, "speedup": 0.771630497297772}
+  ],
+  "semantic": "dense floating SwiGLU drift becomes exact sparse code changes; the runtime routes to full projection after the measured crossover",
+  "scope": "synthetic geometry benchmark; Origami temporal code census determines real code-change distributions"
+}
