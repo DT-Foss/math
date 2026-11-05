@@ -20,7 +20,7 @@ from .graph import laplacian_edge_delta, laplacian_edges_delta
 from .reduction import SegmentReductionTree
 from .coalesce import RowReplacementLog
 from .woodbury import GeneralLowRankUpdate, GeneralWoodburyCache, SolverWoodburyCache
-from .remath_bridge import RemathWirkungHint, classify_remath_formula, annotate_remath_trace
+from .remath_bridge import RemathWirkungHint, classify_remath_formula, temporalize_hint, annotate_remath_trace
 from .dirty2d import AreaCostModel, DirtyGraphCompiler2D, DirtyPlan2D, Rect, schedule_rectangles_optimal
 from .update_ledger import LowRankUpdateLedger, IncrementalWoodburyLedger
 from .cacheless_local import LocalGraphDependency, LocalResidencyChoice, LocalResidencyPlanner
@@ -48,8 +48,15 @@ from .temporal_linear import (
 )
 from .temporal_multilinear import TemporalRMSNormMultiLinearState
 from .temporal_quantized import QuantizedVectorState, QuantizedTemporalLinearState
+from .temporal_activation import QuantizedSwiGLUDownState, silu, nearest_codes
 from .router_certificate import CertifiedTopKRouterState
 from .partition_attention import CompiledPartitionAttention, PartitionAttentionBank
+from .tensor_train import TensorTrain
+from .tensor_partition_attention import TensorTrainPartitionAttention
+from .delta_operator import (
+    DeltaLinearOperator, DenseDeltaLinearOperator, CallbackDeltaLinearOperator,
+    TemporalOperatorState, BasisOperatorState,
+)
 from .temporal_census import (
     TemporalDeltaRecord, TemporalDeltaCensus, measure_temporal_delta,
     support_for_energy, effective_rank,
@@ -76,7 +83,7 @@ __all__ = [
     "laplacian_edge_delta","laplacian_edges_delta",
     "SegmentReductionTree","RowReplacementLog",
     "GeneralLowRankUpdate","GeneralWoodburyCache","SolverWoodburyCache",
-    "RemathWirkungHint","classify_remath_formula","annotate_remath_trace",
+    "RemathWirkungHint","classify_remath_formula","temporalize_hint","annotate_remath_trace",
     "AreaCostModel","DirtyGraphCompiler2D","DirtyPlan2D","Rect","schedule_rectangles_optimal",
     "LowRankUpdateLedger","IncrementalWoodburyLedger",
     "LocalGraphDependency","LocalResidencyChoice","LocalResidencyPlanner",
@@ -92,7 +99,11 @@ __all__ = [
     "sparse_linear_delta","TemporalLinearState","BasisDeltaLinearState",
     "BatchLowRankLinearState","TemporalRMSNormLinearState",
     "TemporalRMSNormMultiLinearState","QuantizedVectorState","QuantizedTemporalLinearState",
+    "QuantizedSwiGLUDownState","silu","nearest_codes",
     "CertifiedTopKRouterState","CompiledPartitionAttention","PartitionAttentionBank",
+    "TensorTrain","TensorTrainPartitionAttention",
+    "DeltaLinearOperator","DenseDeltaLinearOperator","CallbackDeltaLinearOperator",
+    "TemporalOperatorState","BasisOperatorState",
     "TemporalDeltaRecord","TemporalDeltaCensus","measure_temporal_delta",
     "support_for_energy","effective_rank",
     "LinearDeltaRoute","DeltaPortfolio","LinearRouteCost","LinearDeltaPlanner",
