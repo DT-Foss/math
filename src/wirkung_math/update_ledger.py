@@ -74,6 +74,8 @@ class IncrementalWoodburyLedger:
     V:np.ndarray|None=None
     AU:np.ndarray|None=None
     M_inv:np.ndarray|None=None
+    core_sign:float=1.0
+    core_logabsdet:float=0.0
 
     @property
     def rank(self)->int:
@@ -91,6 +93,8 @@ class IncrementalWoodburyLedger:
             D=np.eye(q)+V_new.T@AU_new
             self.U=U_new.copy();self.V=V_new.copy();self.AU=AU_new
             self.M_inv=np.linalg.inv(D)
+            sign,logabs=np.linalg.slogdet(D)
+            self.core_sign=float(sign);self.core_logabsdet=float(logabs)
             return
 
         assert self.V is not None and self.AU is not None and self.M_inv is not None
@@ -99,6 +103,9 @@ class IncrementalWoodburyLedger:
         D=np.eye(q)+V_new.T@AU_new
         S=D-B@self.M_inv@A
         S_inv=np.linalg.inv(S)
+        sign_s,log_s=np.linalg.slogdet(S)
+        self.core_sign*=float(sign_s)
+        self.core_logabsdet+=float(log_s)
 
         MI=self.M_inv
         MIA=MI@A
@@ -122,6 +129,9 @@ class IncrementalWoodburyLedger:
         z=np.asarray(self.solve_base(B),dtype=np.float64)
         out=z-self.AU@(self.M_inv@(self.V.T@z))
         return out[:,0] if vector else out
+
+    def logdet_update(self,base_sign:float,base_logabsdet:float)->tuple[float,float]:
+        return float(base_sign*self.core_sign),float(base_logabsdet+self.core_logabsdet)
 
     def materialize_update(self)->np.ndarray:
         if self.U is None:

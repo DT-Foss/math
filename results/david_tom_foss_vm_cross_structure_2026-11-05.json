@@ -1,5 +1,5 @@
 {
-  "source":"Sol VM controlled single-thread benchmark, 2026-11-05",
+  "source":"David Tom Foss VM controlled single-thread benchmark, 2026-11-05",
   "environment":{"blas_threads":1,"dtype":"float64"},
   "sparse_feature_rbf":[
     {"n":32768,"d":256,"changed_features":1,"full_ms":27.760178,"delta_ms":0.504649,"speedup":55.00888340212702,"max_abs_error":2.6469779601696886e-23},

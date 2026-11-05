@@ -22,6 +22,11 @@ The goal is not to make a CPU imitate a GPU kernel-by-kernel. The goal is to rep
 - sparse DFT and dynamic butterfly-DAG reference paths;
 - a typed representation-switching delta IR;
 - a consumer-aware CPU↔GPU hardware router calibrated against resident V100 baselines;
+- output-demand routing (`edit support × requested outputs`);
+- cacheless local reconstruction and lifetime/residency planning;
+- lazy normalized query reconciliation;
+- lazy Gram state with streaming Solve/Logdet consumers;
+- whole-graph representation/device shortest-path planning;
 - Remath portability/observability integration receipts under `tools/remath/`;
 - E172–E177 plus E186–E187 executable experiments, with E185 CPU-box provenance;
 - regression tests for every exact rewrite;
@@ -36,6 +41,7 @@ The goal is not to make a CPU imitate a GPU kernel-by-kernel. The goal is to rep
 - `docs/ARCHITECTURE.md` — runtime model
 - `docs/RESULTS.md` — chronological measured results
 - `docs/HARDWARE_ROUTER.md` — measured CPU↔GPU routing rules
+- `docs/FINAL_SYNTHESIS_2026-11-05.md` — final breakthrough map and overlooked levers
 - `tools/remath/` — leak-safe Remath portability integration
 - `results/` — machine-readable imported/generated records
 - `scripts/run_and_record.py` — reproducible experiment recorder
@@ -80,7 +86,7 @@ Executable verification in this repository:
 - E186 learns a 167.55-cell merge/split crossover and drives an optimal component partitioner;
 - E187 preserves the dirty-path gain through global consumers: 649.36× cached sum update and 448.87× projected update on the recorded VM run.
 
-See `docs/INCREMENTAL_ALGEBRA.md` for the unified model, and `docs/RESULTS.md` / `results/` for full provenance.
+See `docs/FINAL_SYNTHESIS_2026-11-05.md` for the final synthesis, `docs/INCREMENTAL_ALGEBRA.md` for the algebra, and `docs/RESULTS.md` / `results/` for full provenance.
 
 
 ## Hardware replacement status
@@ -94,3 +100,15 @@ The repository now contains direct resident-V100 comparisons, not only CPU-vs-CP
 - RBF -> solve: structured CPU rank-delta path wins 16.57× / 11.51× / 4.54× for 1/4/16 edits at n=4096.
 
 The router is consumer-aware: requiring a dense intermediate and consuming a structured delta are different execution problems.
+
+
+## Final run closure
+
+The E168–E209 round established direct resident-V100 crossover maps for local nonlinear graphs, pairwise kernels, spectral demand and normalized-query demand, plus persistent streaming state and GPU->CPU handoff economics.
+
+The post-run David Tom Foss follow-up adds two major execution regimes:
+
+- **cacheless local reconstruction:** exact old/new dirty outputs from bounded input crops, eliminating full intermediate activation caches for compatible consumers;
+- **lazy query reconciliation:** unrequested normalized outputs incur zero maintenance work and reconcile exact edit history only when queried.
+
+The runtime now plans over change structure, requested output, future consumer, state residency, expected horizon and hardware.

@@ -1,0 +1,15 @@
+{
+  "source":"David Tom Foss VM controlled follow-up, 2026-11-05",
+  "shape":{"n":4096,"d":64,"changed_kv_rows":16},
+  "eager_all_rows_ms":1.521530499758228,
+  "requested_rows":[
+    {"queries":1,"lazy_ms":0.0338860004376329,"speedup_vs_eager_cpu":44.90144838894756},
+    {"queries":16,"lazy_ms":0.045449000026565045,"speedup_vs_eager_cpu":33.47775526125745},
+    {"queries":32,"lazy_ms":0.05565899982684641,"speedup_vs_eager_cpu":27.336648241823724},
+    {"queries":64,"lazy_ms":0.06891399971209466,"speedup_vs_eager_cpu":22.078685116446575},
+    {"queries":128,"lazy_ms":0.09776749993761769,"speedup_vs_eager_cpu":15.56274325035485},
+    {"queries":256,"lazy_ms":0.1600154996594938,"speedup_vs_eager_cpu":9.508644493789541},
+    {"queries":512,"lazy_ms":0.27780849995906465,"speedup_vs_eager_cpu":5.476904054348326}
+  ],
+  "max_abs_error_fp32":4.981202318676825e-8
+}

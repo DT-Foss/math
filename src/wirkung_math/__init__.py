@@ -23,9 +23,16 @@ from .woodbury import GeneralLowRankUpdate, GeneralWoodburyCache, SolverWoodbury
 from .remath_bridge import RemathWirkungHint, classify_remath_formula, annotate_remath_trace
 from .dirty2d import AreaCostModel, DirtyGraphCompiler2D, DirtyPlan2D, Rect, schedule_rectangles_optimal
 from .update_ledger import LowRankUpdateLedger, IncrementalWoodburyLedger
+from .cacheless_local import LocalGraphDependency, LocalResidencyChoice, LocalResidencyPlanner
+from .lazy_normalized import LazyNormalizedKVState
+from .lifetime import ExecutionRegime, HorizonPlanner
+from .demand_linear import sparse_requested_linear_delta
+from .plan_graph import PlanTransition, PlanResult, RepresentationPlanGraph
+from .lazy_gram import LazyGramState
 from .hardware_router import (
     ConsumerAwareKernelRouter, ConsumerRequirement, DirtyV100Calibration,
     KernelMaterializationCalibration, KernelSolveCalibration,
+    SparseSpectrumV100Calibration, NormalizedQueryV100Calibration,
 )
 
 __all__ = [
@@ -48,6 +55,10 @@ __all__ = [
     "RemathWirkungHint","classify_remath_formula","annotate_remath_trace",
     "AreaCostModel","DirtyGraphCompiler2D","DirtyPlan2D","Rect","schedule_rectangles_optimal",
     "LowRankUpdateLedger","IncrementalWoodburyLedger",
+    "LocalGraphDependency","LocalResidencyChoice","LocalResidencyPlanner",
+    "LazyNormalizedKVState","ExecutionRegime","HorizonPlanner","sparse_requested_linear_delta",
+    "PlanTransition","PlanResult","RepresentationPlanGraph","LazyGramState",
     "ConsumerAwareKernelRouter","ConsumerRequirement","DirtyV100Calibration",
     "KernelMaterializationCalibration","KernelSolveCalibration",
+    "SparseSpectrumV100Calibration","NormalizedQueryV100Calibration",
 ]

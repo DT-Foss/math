@@ -1,0 +1,19 @@
+{
+  "source":"David Tom Foss VM controlled follow-up, 2026-11-05",
+  "graph":{"channels":16,"layers":12,"kernel":"3x3","activation":"SiLU","residual":true,"patch":8,"cpu_threads":4},
+  "method":"old and new final dirty outputs recomputed from two local input crops; no full intermediate activation cache",
+  "total_receptive_radius":12,
+  "final_dirty_side":32,
+  "input_crop_side":56,
+  "input_crop_bytes_fp32":200704,
+  "cases":[
+    {"size":256,"cpu_full_ms":47.796924500289606,"local_ms":6.503680499918119,"speedup":7.349211650371104,"max_region_error":0.0},
+    {"size":512,"cpu_full_ms":343.2941559995015,"local_ms":4.422777999934624,"speedup":77.61957665624999,"max_region_error":0.0},
+    {"size":1024,"cpu_full_ms":767.8554309995889,"local_ms":3.882424999574141,"speedup":197.77727350401207,"max_region_error":0.0},
+    {"size":1536,"cpu_full_ms":1970.4719305000253,"local_ms":3.6936505002813647,"speedup":533.4754683340842,"max_region_error":0.0}
+  ],
+  "global_sum_check":{"size":512,"max_abs_error":0.0},
+  "full_activation_cache_bytes_2048":3489660928,
+  "cache_to_crop_byte_ratio_2048":17387.102040816328,
+  "crop_transfer_ms_at_13_2_GBps":0.015204848484848484
+}

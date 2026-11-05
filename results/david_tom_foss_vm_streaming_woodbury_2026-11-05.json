@@ -1,5 +1,5 @@
 {
-  "source":"Sol VM streaming Woodbury-core benchmark, 2026-11-05",
+  "source":"David Tom Foss VM streaming Woodbury-core benchmark, 2026-11-05",
   "configuration":{"d":1024,"rhs":8,"update":"sequential rank-1 symmetric positive updates","base_state":"cached Cholesky solver","blas_threads":1},
   "cases":[
     {"rank":1,"append_ms":2.453905,"solve_ms":1.913991,"full_refactor_solve_ms":20.722951,"solve_speedup":10.827089051097941,"append_plus_solve_speedup":4.7443783002159385,"max_abs_error":6.800116025829084e-16},
