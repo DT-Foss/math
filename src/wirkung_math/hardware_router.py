@@ -20,10 +20,10 @@ class DirtyV100Calibration:
       T_gpu(N) = intercept_ms + ms_per_pixel * N^2.
     CPU dirty time is nearly flat over the same sweep.
     """
-    gpu_intercept_ms: float = 0.150518844
-    gpu_ms_per_pixel: float = 1.22620038e-5
-    cpu_delta_ms: float = 1.723580137
-    measured_lower_gpu_wins: int = 320
+    gpu_intercept_ms: float = 0.166659722
+    gpu_ms_per_pixel: float = 1.22227495e-5
+    cpu_delta_ms: float = 1.737064110
+    measured_lower_gpu_wins: int = 352
     measured_upper_cpu_wins: int = 384
 
     @property
@@ -98,3 +98,45 @@ class ConsumerAwareKernelRouter:
             # retaining the rank factor instead of materializing n^2 state.
             return "cpu_structured" if edits < self.solve.linearized_ratio_crossover_edits else "v100_full"
         raise ValueError(requirement)
+
+
+@dataclass(frozen=True)
+class SparseSpectrumV100Calibration:
+    """
+    n=1,048,576, 16 changed input values.
+    CPU updates only requested Fourier coefficients; V100 computes full FFT.
+    """
+    measured_cpu_max_requested: int = 16384
+    measured_gpu_min_requested: int = 65536
+    ratio_at_cpu_max: float = 1.4198354517120184
+    ratio_at_gpu_min: float = 0.7224630831837885
+
+    @property
+    def interpolated_crossover_requested(self) -> float:
+        k1=float(self.measured_cpu_max_requested); k2=float(self.measured_gpu_min_requested)
+        r1=self.ratio_at_cpu_max; r2=self.ratio_at_gpu_min
+        return k1+(k2-k1)*(r1-1.0)/(r1-r2)
+
+    def route(self, requested_frequencies:int) -> str:
+        return "cpu_sparse_spectrum" if requested_frequencies < self.interpolated_crossover_requested else "v100_full_fft"
+
+
+@dataclass(frozen=True)
+class NormalizedQueryV100Calibration:
+    """
+    n=8192, heads=2, d=64, 16 changed terms.
+    CPU uses cached normalized sufficient state; V100 recomputes only requested queries.
+    """
+    measured_cpu_max_queries:int = 128
+    measured_gpu_min_queries:int = 256
+    ratio_at_cpu_max:float = 1.0278777347718648
+    ratio_at_gpu_min:float = 0.6180711674272338
+
+    @property
+    def interpolated_crossover_queries(self)->float:
+        q1=float(self.measured_cpu_max_queries); q2=float(self.measured_gpu_min_queries)
+        r1=self.ratio_at_cpu_max; r2=self.ratio_at_gpu_min
+        return q1+(q2-q1)*(r1-1.0)/(r1-r2)
+
+    def route(self,requested_queries:int)->str:
+        return "cpu_cached_queries" if requested_queries < self.interpolated_crossover_queries else "v100_requested_queries"
