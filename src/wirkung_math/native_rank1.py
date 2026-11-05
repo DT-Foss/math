@@ -6,6 +6,8 @@ from pathlib import Path
 import shutil
 import subprocess
 import tempfile
+import platform
+import sys
 import numpy as np
 
 _C_SOURCE = r"""
@@ -86,9 +88,10 @@ def build_rank1_stats_kernel(directory: str|os.PathLike[str]|None=None) -> str:
     out=Path(directory or tempfile.mkdtemp(prefix="wirkung-rank1-"))
     out.mkdir(parents=True,exist_ok=True)
     src=out/"rank1_stats.c"
-    lib=out/("rank1_stats.dylib" if os.uname().sysname=="Darwin" else "rank1_stats.so")
+    lib=out/("rank1_stats.dylib" if sys.platform=="darwin" else ("rank1_stats.dll" if os.name=="nt" else "rank1_stats.so"))
     src.write_text(_C_SOURCE)
-    cmd=[_compiler(),"-O3","-march=native","-shared","-fPIC",str(src),"-o",str(lib)]
+    arch=["-mcpu=native"] if sys.platform=="darwin" and platform.machine().lower() in {"arm64","aarch64"} else ["-march=native"]
+    cmd=[_compiler(),"-O3",*arch,"-shared","-fPIC",str(src),"-o",str(lib)]
     subprocess.run(cmd,check=True)
     return str(lib)
 
