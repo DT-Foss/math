@@ -100,3 +100,35 @@ def lowrank_replacement_statistics(
     core[:r,r:]=0.5*np.eye(r)
     core[r:,:r]=0.5*np.eye(r)
     return ds,dq,SymmetricLowRankDelta(U,core)
+
+
+def lowrank_delta_statistics_from_base(
+    A: np.ndarray,
+    B: np.ndarray,
+    old: np.ndarray,
+) -> tuple[np.ndarray,np.ndarray,SymmetricLowRankDelta]:
+    """
+    Exact sufficient-statistic update from a factored delta D=A B^T without
+    materializing D or new=old+D.
+
+      P = 2 old + D
+      C = A^T P = 2 A^T old + (A^T A) B^T
+
+      Delta S = B sum(A)
+      Delta Q_j = <B[j,:], C[:,j]>
+      Delta G = 1/2(B C + C^T B^T), rank <= 2r.
+    """
+    A=np.asarray(A,dtype=np.float64)
+    B=np.asarray(B,dtype=np.float64)
+    old=np.asarray(old,dtype=np.float64)
+    if A.ndim!=2 or B.ndim!=2 or old.ndim!=2 or A.shape[0]!=old.shape[0] or B.shape[0]!=old.shape[1] or A.shape[1]!=B.shape[1]:
+        raise ValueError("shape mismatch")
+    Csmall=2.0*(A.T@old) + (A.T@A)@B.T
+    ds=B@A.sum(axis=0)
+    dq=np.einsum("jr,rj->j",B,Csmall,optimize=False)
+    r=A.shape[1]
+    U=np.concatenate([B,Csmall.T],axis=1)
+    core=np.zeros((2*r,2*r),dtype=np.float64)
+    core[:r,r:]=0.5*np.eye(r)
+    core[r:,:r]=0.5*np.eye(r)
+    return ds,dq,SymmetricLowRankDelta(U,core)
