@@ -254,3 +254,18 @@ RBF -> dynamic solve:
 - n=1024: 47–167×;
 - n=2048: **382× / 291× / 132×** for e=1/4/16.
 - n=4096 was announced as the next CPU-box point; no result was supplied yet.
+
+
+## ChatGPT VM cross-check — dynamic normalized bilinear state
+
+Machine-readable record: `results/chatgpt_vm_dynamic_bilinear_2026-11-05.json`.
+
+AMD EPYC 9V74, NumPy/OpenBLAS 5 threads, FP32, d=64. Cached old Q/K/V output and log-partitions are persistent state; setup/state copies were excluded from the timed update.
+
+- n=1024: 51.37× / 15.80× / 1.86× for e=1/8/64.
+- n=2048: 32.31× / 28.82× / 15.57×.
+- n=4096: **86.57× / 38.46× / 11.81×**.
+- zero clean-row fallbacks in all nine random cases.
+- max absolute output error <= 2.95e-7.
+
+This composes pairwise row/column change geometry with the normalized sufficient-statistic state rather than rebuilding the full n×n bilinear map.
