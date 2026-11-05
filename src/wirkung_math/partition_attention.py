@@ -120,8 +120,33 @@ class CompiledPartitionAttention:
 
 @dataclass
 class PartitionAttentionBank:
-    """Compiled partitions for the temporal delta-support patterns seen most often."""
+    """
+    Exact compiled partitions for the temporal query-support patterns observed
+    most often by the census. Each support chooses columns from quantized key
+    codes; no manual signature construction is needed.
+    """
     partitions:dict[tuple[int,...],CompiledPartitionAttention]
+
+    @classmethod
+    def compile_supports(
+        cls,
+        base_scores:np.ndarray,
+        key_codes:np.ndarray,
+        values:np.ndarray,
+        supports:list[tuple[int,...]]|tuple[tuple[int,...],...],
+    )->"PartitionAttentionBank":
+        codes=np.asarray(key_codes)
+        if codes.ndim!=2:
+            raise ValueError("key_codes must be [tokens, code_width]")
+        parts={}
+        for support0 in supports:
+            support=tuple(int(i) for i in support0)
+            if not support:
+                raise ValueError("empty support is not useful")
+            parts[support]=CompiledPartitionAttention.compile(
+                base_scores,codes[:,support],values
+            )
+        return cls(parts)
 
     def query(self,support:tuple[int,...],alpha:np.ndarray)->tuple[np.ndarray,float]:
         try:
@@ -130,9 +155,26 @@ class PartitionAttentionBank:
             raise KeyError(f"uncompiled temporal support {support}") from exc
         return part.query(alpha)
 
+    def append(
+        self,base_score:float,key_code:np.ndarray,value:np.ndarray
+    )->None:
+        code=np.asarray(key_code)
+        for support,part in self.partitions.items():
+            part.append(base_score,code[list(support)],value)
+
     def best_supports(self)->tuple[tuple[int,...],...]:
         return tuple(sorted(
             self.partitions,
             key=lambda s:self.partitions[s].compression_ratio,
             reverse=True,
         ))
+
+    def report(self)->dict:
+        return {
+            str(support):{
+                "tokens":part.token_count,
+                "groups":part.occupied_groups,
+                "compression_ratio":part.compression_ratio,
+            }
+            for support,part in self.partitions.items()
+        }
