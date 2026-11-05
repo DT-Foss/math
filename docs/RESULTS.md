@@ -48,9 +48,9 @@ Upper-bound search:
 - best reported speedup: 2.453×;
 - errors about 1e-7.
 
-## Executable verification on Sol VM — 2026-11-05
+## Executable verification on David Tom Foss VM — 2026-11-05
 
-Machine-readable record: `results/sol_vm_2026-11-05.json`.
+Machine-readable record: `results/david_tom_foss_vm_2026-11-05.json`.
 
 Environment: AMD EPYC 9V74, NumPy 2.3.5, Python 3.13.5, single-thread BLAS/OMP.
 
@@ -162,7 +162,7 @@ For a narrow projection `G=sum_i x_i W`, the runtime uses:
 
 `G' = G + sum(delta_dirty) W`.
 
-Independent executable check on the Sol VM (AMD EPYC 9V74, Float64), n=131072, d=64, 256 dirty rows:
+Independent executable check on the David Tom Foss VM (AMD EPYC 9V74, Float64), n=131072, d=64, 256 dirty rows:
 
 - cached global sum update: **649.36×** vs full reduction;
 - cached 8-wide projected reduction: **448.87×** vs full reduction+projection;
@@ -256,9 +256,9 @@ RBF -> dynamic solve:
 - n=4096: **801× / 640× / 230×** for e=1/4/16, all correct with residuals ~1e-13.
 
 
-## Sol VM cross-check — dynamic normalized bilinear state
+## David Tom Foss VM cross-check — dynamic normalized bilinear state
 
-Machine-readable record: `results/sol_vm_dynamic_bilinear_2026-11-05.json`.
+Machine-readable record: `results/david_tom_foss_vm_dynamic_bilinear_2026-11-05.json`.
 
 AMD EPYC 9V74, NumPy/OpenBLAS 5 threads, FP32, d=64. Cached old Q/K/V output and log-partitions are persistent state; setup/state copies were excluded from the timed update.
 
@@ -307,7 +307,7 @@ GPU inputs/weights are resident and host transfer is excluded.
 - moments + full Gram: 0.0695 ms CPU delta vs 5.115 ms V100 full = **73.6×**;
 - solve + logdet after low-rank change: 0.809 ms vs 18.27 ms = **22.6×**.
 
-For the 12-layer patch-8 dirty graph, measured small-area points give a hardware crossover bracket of **320 < N* < 384**. Sol fits the 256–512 V100 points as
+For the 12-layer patch-8 dirty graph, measured small-area points give a hardware crossover bracket of **320 < N* < 384**. A fit over the 256–512 V100 points gives
 
 `T_V100(N) ~= 0.1505 ms + 1.2262e-5 ms * N²`
 
@@ -333,10 +333,10 @@ But at n=4096 with an 8-RHS solve, keeping the same kernel change as rank<=2e an
 The router must therefore include the consumer's required representation; edit count alone is insufficient.
 
 
-## Sol VM cross-structure checks — 2026-11-05
+## David Tom Foss VM cross-structure checks — 2026-11-05
 
-Machine-readable record: `results/sol_vm_cross_structure_2026-11-05.json`.
-Executable benchmark: `experiments/sol_cross_structure_bench.py`.
+Machine-readable record: `results/david_tom_foss_vm_cross_structure_2026-11-05.json`.
+Executable benchmark: `experiments/david_tom_foss_cross_structure_bench.py`.
 
 ### Sparse-feature RBF
 
@@ -366,7 +366,7 @@ This validates a separate incremental class for associative reductions that do n
 
 ### Sol streaming Woodbury-core check
 
-Machine-readable record: `results/sol_vm_streaming_woodbury_2026-11-05.json`.
+Machine-readable record: `results/david_tom_foss_vm_streaming_woodbury_2026-11-05.json`.
 
 For d=1024, 8 RHS and sequential rank-1 updates on top of a cached Cholesky base solver, the incrementally maintained Woodbury core keeps old `A^-1 U` columns and updates only the new block:
 
