@@ -362,3 +362,17 @@ For n=1,048,576 scalar values, an exact max reduction stored as a segment tree g
 - exact root aggregate.
 
 This validates a separate incremental class for associative reductions that do not need an algebraic inverse.
+
+
+### Sol streaming Woodbury-core check
+
+Machine-readable record: `results/sol_vm_streaming_woodbury_2026-11-05.json`.
+
+For d=1024, 8 RHS and sequential rank-1 updates on top of a cached Cholesky base solver, the incrementally maintained Woodbury core keeps old `A^-1 U` columns and updates only the new block:
+
+- accumulated rank 16: solve **13.46×** vs full refactor+solve; update+solve **6.13×**;
+- accumulated rank 32: solve **17.50×**; update+solve **8.36×**;
+- append cost remains ~1.5–2.5 ms over the measured range;
+- max absolute errors stay below 7e-16.
+
+This closes the persistent-state gap for the low-rank solver family as well as for dirty-local execution.
