@@ -331,3 +331,34 @@ But at n=4096 with an 8-RHS solve, keeping the same kernel change as rank<=2e an
 - solution differences are ~1e-13.
 
 The router must therefore include the consumer's required representation; edit count alone is insufficient.
+
+
+## Sol VM cross-structure checks — 2026-11-05
+
+Machine-readable record: `results/sol_vm_cross_structure_2026-11-05.json`.
+Executable benchmark: `experiments/sol_cross_structure_bench.py`.
+
+### Sparse-feature RBF
+
+A single changed point with only `s` changed feature coordinates updates its full RBF row from cached squared distances in `O(ns)` rather than `O(nd)`.
+
+Controlled Float64, single-BLAS-thread results:
+
+- n=32,768,d=256,s=1: **55.01×**
+- n=32,768,d=256,s=4: **17.29×**
+- n=65,536,d=256,s=1: **60.57×**
+- n=65,536,d=256,s=4: **11.40×**
+- n=65,536,d=256,s=16: **3.07×**
+
+Maximum absolute errors were below 4e-23 in these runs. The resulting pairwise matrix change remains row/column-supported with rank <=2e, so this feature-sparse front-end composes directly with the existing Woodbury solver path.
+
+### Associative reduction tree
+
+For n=1,048,576 scalar values, an exact max reduction stored as a segment tree gave:
+
+- full NumPy max median: 108.513 us
+- point-update tree path: 5.308 us
+- **20.44×**
+- exact root aggregate.
+
+This validates a separate incremental class for associative reductions that do not need an algebraic inverse.
