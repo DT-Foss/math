@@ -47,3 +47,34 @@ class GeneralWoodburyCache:
     def logdet_update(self,base_sign: float,base_logabsdet: float) -> tuple[float,float]:
         sign,logabs=np.linalg.slogdet(self.middle)
         return float(base_sign*sign),float(base_logabsdet+logabs)
+
+
+@dataclass
+class SolverWoodburyCache:
+    """
+    Woodbury on top of any cached base solver; no explicit A^-1 is required.
+
+    solve_base(B) must return A^-1 B.
+    """
+    solve_base: object
+    update: GeneralLowRankUpdate
+    AU: np.ndarray
+    middle: np.ndarray
+
+    @classmethod
+    def prepare(cls,solve_base,update: GeneralLowRankUpdate) -> "SolverWoodburyCache":
+        AU=np.asarray(solve_base(update.U),dtype=np.float64)
+        middle=np.eye(update.rank_bound)+update.V.T@AU
+        return cls(solve_base,update,AU,middle)
+
+    def apply_inverse(self,rhs: np.ndarray) -> np.ndarray:
+        rhs=np.asarray(rhs,dtype=np.float64)
+        vector=rhs.ndim==1
+        B=rhs[:,None] if vector else rhs
+        z=np.asarray(self.solve_base(B),dtype=np.float64)
+        out=z-self.AU@np.linalg.solve(self.middle,self.update.V.T@z)
+        return out[:,0] if vector else out
+
+    def logdet_update(self,base_sign: float,base_logabsdet: float) -> tuple[float,float]:
+        sign,logabs=np.linalg.slogdet(self.middle)
+        return float(base_sign*sign),float(base_logabsdet+logabs)
