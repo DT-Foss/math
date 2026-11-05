@@ -1,0 +1,24 @@
+{
+  "source": "David Tom Foss Hugging Face CPU-performance job 6aecfdff0e0338d1bb80bcb2, 2026-11-05",
+  "model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+  "parameters": 134515008,
+  "layers": 30,
+  "generated_tokens": 48,
+  "quantization": "5-bit per-coordinate",
+  "predictor_dictionary": [[1,0],[2,-1],[0,1],[0,0],[3,-2],[-1,2],[2,0],[1,-1]],
+  "event_geometry": {
+    "attn_norm": {"hold_fraction_median": 0.9435763888888888, "predictor_fraction_median": 0.9444444444444444, "event_reduction": 0.9990842490842491},
+    "attn_out": {"hold_fraction_median": 0.8472222222222223, "predictor_fraction_median": 0.8463541666666667, "event_reduction": 0.9951983065953653},
+    "mlp_hidden": {"hold_fraction_median": 0.8792317708333333, "predictor_fraction_median": 0.8284505208333333, "event_reduction": 1.0657588586754287},
+    "mlp_norm": {"hold_fraction_median": 0.9409722222222222, "predictor_fraction_median": 0.9427083333333334, "event_reduction": 0.9963167462556979}
+  },
+  "selected_module_replay": {
+    "modules": 12,
+    "full_ms": 14.872102,
+    "predictor_ms": 216.776098,
+    "routed_ms": 14.872102,
+    "predictor_route_modules": 0,
+    "routed_speedup": 1.0
+  },
+  "conclusion": "Coordinate-wise hold/velocity/AR predictors do not diagonalize real transformer token dynamics. The temporal predictor must be cross-coordinate, consumer-aware, or compiled into a learned state basis; coordinate AR is rejected as a runtime route."
+}
