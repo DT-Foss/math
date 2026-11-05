@@ -1,0 +1,73 @@
+{
+  "source": "David Tom Foss Hugging Face CPU-performance job 6aed0090c78863f9c633a96e, 2026-11-05",
+  "model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+  "parameters": 134515008,
+  "layers": 30,
+  "generated_tokens": 160,
+  "generation_tokens_per_second": 17.1033,
+  "method": "token-to-token delta matrices over all 120 captured layer states; SVD energy rank, calibration-prefix basis generalization, and online novelty",
+  "by_source_type": {
+    "attn_norm": {
+      "width": 576,
+      "rank_90_median": 46.5,
+      "rank_99_median": 102.0,
+      "rank_999_median": 135.0,
+      "rank99_fraction_median": 0.1771,
+      "rank999_fraction_median": 0.2344,
+      "heldout_capture_rank16_median": 0.549,
+      "heldout_capture_rank32_median": 0.628,
+      "heldout_capture_rank64_median": 0.707,
+      "heldout_capture_rank128_median": 0.731,
+      "online_novel_energy_median": 0.178,
+      "online_novel_energy_last_quarter_median": 0.068
+    },
+    "attn_out": {
+      "width": 576,
+      "rank_90_median": 36.0,
+      "rank_99_median": 90.5,
+      "rank_999_median": 131.0,
+      "rank99_fraction_median": 0.1571,
+      "rank999_fraction_median": 0.2274,
+      "heldout_capture_rank16_median": 0.496,
+      "heldout_capture_rank32_median": 0.589,
+      "heldout_capture_rank64_median": 0.686,
+      "heldout_capture_rank128_median": 0.720,
+      "online_novel_energy_median": 0.172,
+      "online_novel_energy_last_quarter_median": 0.075
+    },
+    "mlp_hidden": {
+      "width": 1536,
+      "rank_90_median": 53.5,
+      "rank_99_median": 109.0,
+      "rank_999_median": 138.5,
+      "rank99_fraction_median": 0.0710,
+      "rank999_fraction_median": 0.0902,
+      "heldout_capture_rank16_median": 0.366,
+      "heldout_capture_rank32_median": 0.434,
+      "heldout_capture_rank64_median": 0.510,
+      "heldout_capture_rank128_median": 0.530,
+      "online_novel_energy_median": 0.271,
+      "online_novel_energy_last_quarter_median": 0.116
+    },
+    "mlp_norm": {
+      "width": 576,
+      "rank_90_median": 51.5,
+      "rank_99_median": 105.0,
+      "rank_999_median": 137.5,
+      "rank99_fraction_median": 0.1823,
+      "rank999_fraction_median": 0.2387,
+      "heldout_capture_rank16_median": 0.450,
+      "heldout_capture_rank32_median": 0.542,
+      "heldout_capture_rank64_median": 0.631,
+      "heldout_capture_rank128_median": 0.652,
+      "online_novel_energy_median": 0.235,
+      "online_novel_energy_last_quarter_median": 0.075
+    }
+  },
+  "layer_extremes": [
+    {"source": "L0.attn_out", "heldout_capture_rank16": 0.9425, "heldout_capture_rank32": 0.9631, "heldout_capture_rank128": 0.9796, "last_quarter_novel_energy_median": 0.00337},
+    {"source": "L24.attn_out", "heldout_capture_rank128": 0.8837, "last_quarter_novel_energy_median": 0.0137},
+    {"source": "L29.mlp_hidden", "heldout_capture_rank128": 0.8400, "last_quarter_novel_energy_median": 0.0399}
+  ],
+  "conclusion": "Real transformer innovation is dense in the coordinate basis but occupies a much smaller evolving temporal subspace. A fixed prefix basis generalizes unevenly; an adaptive response basis and model-trained temporal coordinates are the correct next representation. The MLP hidden state reaches 99% delta energy at only about 7% of its width."
+}
