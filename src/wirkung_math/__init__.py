@@ -33,6 +33,7 @@ from .replacement import replacement_statistics_delta, replacement_gram_delta, r
 from .demand_slice import DemandSlice, delta_demand_slice
 from .state_quotient import AdditiveStatsFootprint, StateQuotient
 from .native_rank1 import NativeRank1StatsState, build_rank1_stats_kernel
+from .cold_state import ColdRowFetchModel, ColdBackedDeltaPlan
 from .hardware_router import (
     ConsumerAwareKernelRouter, ConsumerRequirement, DirtyV100Calibration,
     KernelMaterializationCalibration, KernelSolveCalibration,
@@ -64,7 +65,7 @@ __all__ = [
     "PlanTransition","PlanResult","RepresentationPlanGraph","LazyGramState",
     "replacement_statistics_delta","replacement_gram_delta","replacement_cross_delta",
     "DemandSlice","delta_demand_slice","AdditiveStatsFootprint","StateQuotient",
-    "NativeRank1StatsState","build_rank1_stats_kernel",
+    "NativeRank1StatsState","build_rank1_stats_kernel","ColdRowFetchModel","ColdBackedDeltaPlan",
     "ConsumerAwareKernelRouter","ConsumerRequirement","DirtyV100Calibration",
     "KernelMaterializationCalibration","KernelSolveCalibration",
     "SparseSpectrumV100Calibration","NormalizedQueryV100Calibration",
