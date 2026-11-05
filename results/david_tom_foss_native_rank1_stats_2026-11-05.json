@@ -1,0 +1,8 @@
+{
+  "source":"David Tom Foss VM native microkernel follow-up, 2026-11-05",
+  "shape":{"edited_rows":1,"d":64,"dtype":"float64"},
+  "kernel":"persistent in-place midpoint/difference update of sum, sumsq and dense Gram",
+  "prebound_ctypes_pointer_call_us":{"median":1.743,"p10":1.713,"p90":1.953},
+  "packed_upper_variant_us":{"median":1.583,"min":1.532},
+  "note":"microkernel timing on a different CPU from the V100 box; not a direct V100 speedup claim"
+}
