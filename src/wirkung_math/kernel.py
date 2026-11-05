@@ -134,3 +134,46 @@ def rbf_single_point_sparse_feature_update(
     newdist=np.maximum(newdist,0.0)
     newdist[int(point_index)]=0.0
     return np.exp(-gamma*newdist)
+
+
+@dataclass
+class RowColumnSolverWoodbury:
+    """Row/column Woodbury over an arbitrary cached symmetric base solver."""
+    solve_base: object
+    delta: RowColumnDelta
+    AF: np.ndarray
+    C: np.ndarray
+    middle: np.ndarray
+
+    @classmethod
+    def prepare(cls,solve_base,delta: RowColumnDelta) -> "RowColumnSolverWoodbury":
+        idx=delta.indices; R=delta.row_delta; e=len(idx); n=R.shape[1]
+        S=np.zeros((n,e),dtype=np.float64)
+        S[idx,np.arange(e)]=1.0
+        AS=np.asarray(solve_base(S),dtype=np.float64)
+        AR=np.asarray(solve_base(R.T),dtype=np.float64)
+        AF=np.concatenate([AS,AR],axis=1)
+        top_left=AS[idx,:]
+        top_right=AR[idx,:]
+        bottom_left=R@AS
+        bottom_right=R@AR
+        gram=np.block([[top_left,top_right],[bottom_left,bottom_right]])
+        B=R[:,idx]
+        C=np.block([[-B,np.eye(e)],[np.eye(e),np.zeros((e,e))]])
+        middle=np.eye(2*e)+C@gram
+        return cls(solve_base,delta,AF,C,middle)
+
+    def _ft(self,z: np.ndarray) -> np.ndarray:
+        return np.concatenate([z[self.delta.indices,:],self.delta.row_delta@z],axis=0)
+
+    def apply_inverse(self,rhs: np.ndarray) -> np.ndarray:
+        rhs=np.asarray(rhs,dtype=np.float64)
+        vector=rhs.ndim==1
+        B=rhs[:,None] if vector else rhs
+        z=np.asarray(self.solve_base(B),dtype=np.float64)
+        out=z-self.AF@np.linalg.solve(self.middle,self.C@self._ft(z))
+        return out[:,0] if vector else out
+
+    def logdet_update(self,base_sign: float,base_logabsdet: float) -> tuple[float,float]:
+        sign,logabs=np.linalg.slogdet(self.middle)
+        return float(base_sign*sign),float(base_logabsdet+logabs)
