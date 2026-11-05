@@ -28,6 +28,15 @@ def rmsnorm_linear(W,x,gamma,eps=1e-6):
     return W@((x/rho)*gamma)
 
 
+def alternating_temporal_update(state,idx,old_values,new_values):
+    toggle=[False]
+    def run():
+        toggle[0]=not toggle[0]
+        target=new_values if toggle[0] else old_values
+        return state.update_sparse(idx,target)
+    return run
+
+
 def run():
     rng=np.random.default_rng(20261105)
     out={"experiment":"David Tom Foss temporal delta machine"}
@@ -41,8 +50,11 @@ def run():
         for k in [1,4,8,16,32,64]:
             idx=np.sort(rng.choice(d,k,replace=False))
             state=TemporalRMSNormLinearState.from_input(W,gamma,x)
-            new=x[idx]+rng.normal(scale=.1,size=k).astype(np.float32)
-            delta_ms=median_ms(lambda:state.update_sparse(idx,new),30)
+            old=x[idx].copy()
+            new=old+rng.normal(scale=.1,size=k).astype(np.float32)
+            update=alternating_temporal_update(state,idx,old,new)
+            update();update()
+            delta_ms=median_ms(update,30)
             rows.append({"changed_coordinates":k,"delta_ms":delta_ms,"speedup":full_ms/delta_ms})
         out["rmsnorm_linear"]={"full_ms":full_ms,"rows":rows}
 
@@ -51,9 +63,12 @@ def run():
         xr=rng.normal(size=d).astype(np.float32);xr[0]=1
         Wr[:6,0]+=10
         router=CertifiedTopKRouterState.from_input(Wr,xr,6)
-        idx=np.sort(rng.choice(d,8,replace=False));new=xr[idx]+1e-4
+        idx=np.sort(rng.choice(d,8,replace=False))
+        old=xr[idx].copy();new=old+1e-4
+        router_update=alternating_temporal_update(router,idx,old,new)
         full_router_ms=median_ms(lambda:Wr@xr,50)
-        cert_ms=median_ms(lambda:router.update_sparse(idx,new),50)
+        router_update();router_update()
+        cert_ms=median_ms(router_update,50)
         out["router"]={"full_ms":full_router_ms,"certificate_ms":cert_ms,"speedup":full_router_ms/cert_ms}
 
         n,dv,r=131072,64,4
