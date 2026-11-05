@@ -364,7 +364,7 @@ For n=1,048,576 scalar values, an exact max reduction stored as a segment tree g
 This validates a separate incremental class for associative reductions that do not need an algebraic inverse.
 
 
-### Sol streaming Woodbury-core check
+### David Tom Foss streaming Woodbury-core check
 
 Machine-readable record: `results/david_tom_foss_vm_streaming_woodbury_2026-11-05.json`.
 
