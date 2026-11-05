@@ -1,0 +1,35 @@
+{
+  "source": "user-supplied CPU-box results, 2026-11-05",
+  "E185_dirty_component_tiling": {
+    "correct_cases": 3,
+    "cases": [
+      {"dirty_changes":2,"speedup_vs_full":196.6,"speedup_vs_bounding_rectangle":3.68},
+      {"dirty_changes":4,"speedup_vs_full":100.4,"speedup_vs_bounding_rectangle":55.6},
+      {"dirty_changes":8,"speedup_vs_full":50.9,"speedup_vs_bounding_rectangle":28.0}
+    ],
+    "interpretation": "Preserve connected dirty components as separate cones across the nonlinear residual graph instead of filling one bounding rectangle."
+  },
+  "E186_dirty_component_merge": {
+    "receptive_radius": 16,
+    "all_outputs_correct": true,
+    "recommendations": {
+      "0":"merged","4":"merged","8":"merged","16":"merged","32":"merged","64":"merged","128":"merged","256":"tiled","384":"tiled"
+    },
+    "selected_measurements": [
+      {"gap":128,"merged_ms":8.996,"tiled_ms":9.002},
+      {"gap":256,"merged_ms":11.58252393361181,"tiled_ms":9.053864981979132},
+      {"gap":384,"merged_ms":13.02360906265676,"tiled_ms":9.749452001415193}
+    ],
+    "gap_fit": {
+      "merged_ms_intercept":5.822425785524378,
+      "merged_ms_per_gap":0.02049972202198457,
+      "tiled_ms_median":9.257104014977813,
+      "predicted_crossover_gap":167.54755141411061,
+      "r2":0.9596333477606858
+    }
+  },
+  "E187_dirty_to_global_reduction": {
+    "status": "algebra supplied; CPU-box numeric result not yet included in the supplied excerpt",
+    "law": "S' = S - sum_{i in D} x_i + sum_{i in D} x'_i"
+  }
+}
