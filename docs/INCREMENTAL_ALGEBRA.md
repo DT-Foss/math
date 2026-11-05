@@ -172,3 +172,84 @@ Persistent incremental state needs a lifetime policy:
 - periodic exact rebasing triggered by conditioning/error budget, not by arbitrary update count.
 
 This is a runtime concern, not a reason to discard incremental algebra.
+
+
+## 10. Demand sparsity: edit set × requested output set
+
+For a fixed linear operator `y=A x`, changed input set `U` and requested output set `K`:
+
+`delta y_K = A[K,U] delta x_U`.
+
+This is a second sparsity axis independent of edit sparsity. If `A[K,U]` can be generated or fetched without building all of `A`, work scales with the product of changed inputs and requested outputs.
+
+Observed manifestations:
+
+- sparse Fourier updates of only requested coefficients;
+- lazy factor chains into narrow consumers;
+- selected blocks of low-rank deltas;
+- requested attention / normalized-query rows.
+
+Implementation: `demand_linear.sparse_requested_linear_delta`.
+
+## 11. Deferred reconciliation
+
+Streaming state does not imply eager maintenance of every output.
+
+`LazyNormalizedKVState` appends K/V changes to a versioned log. A query row applies only the edits since its own version; rows never requested incur no maintenance work. Old log prefixes can be discarded exactly by invalidating stale row caches: their next access performs one full row rebuild from current K/V.
+
+This composes:
+
+- temporal sparsity;
+- demand sparsity;
+- edit coalescing;
+- exact fallback.
+
+## 12. Minimal-state calculus
+
+Persistent state is chosen by **future sufficiency**, not by "cache every intermediate".
+
+For a strictly local deterministic graph with total receptive radius `R`, an input edit patch of side `p` changes final outputs only inside side `p+2R`. Those outputs can be reconstructed from an input crop of side
+
+`p+4R`
+
+without storing intermediate full activations.
+
+State classes therefore form a hierarchy:
+
+1. **no intermediate state**: recompute a bounded local subgraph from an input crop;
+2. **small sufficient statistics / certificates**: sums, moments, Top-K, normalized state;
+3. **factor state**: low-rank / row-column / Woodbury cores;
+4. **selected checkpoints**: only at irreducible nonlocal barriers;
+5. **dense state**: last resort when the consumer actually demands it.
+
+This is a memory-side dual of the delta calculus.
+
+Implementation: `cacheless_local.LocalGraphDependency`.
+
+## 13. Lifetime and residency
+
+Hardware choice depends on the expected future update horizon.
+
+For regime `r`:
+
+`Total_r(H) = Setup_r + H * Update_r`.
+
+This captures GPU cold-start / CPU hot-update handoff, eager pinned state migration, cacheless local execution, demand-paged state, and periodic rebase.
+
+Implementation: `lifetime.HorizonPlanner`, `cacheless_local.LocalResidencyPlanner`.
+
+## 14. Whole-graph representation planning
+
+A local greedy router is insufficient because a representation that is slightly more expensive at one operator may eliminate a huge downstream materialization.
+
+Represent `(device, representation, residency)` choices as states and conversions/rewrite executions as weighted edges. The requested consumer representation is the goal. The runtime chooses the minimum-cost path over the whole future graph.
+
+Implementation: `plan_graph.RepresentationPlanGraph`.
+
+## 15. Lazy Gram state
+
+A row-replacement Gram update is itself low rank. If downstream consumers are solve, logdet or selected matrix blocks, the dense Gram matrix need not be rewritten on every update.
+
+`LazyGramState` stores a fixed base plus a streaming low-rank ledger. The same incremental Woodbury core supplies solve and determinant correction; selected blocks are materialized directly from factors.
+
+Implementation: `lazy_gram.LazyGramState`.
