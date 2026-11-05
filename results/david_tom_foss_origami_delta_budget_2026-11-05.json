@@ -1,0 +1,44 @@
+{
+  "source": "David Tom Foss route-composition budget from measured Beast ctx512 census and controlled temporal-delta prototypes",
+  "current": {
+    "linear_forms_ms": 75.75,
+    "normalized_reductions_ms": 26.24,
+    "io_ms": 19.48,
+    "other_ms": 12.66,
+    "total_ms": 134.13,
+    "tokens_per_second": 7.455453664355476
+  },
+  "scenarios": [
+    {
+      "name": "direction-major k64 / compiled attention / codec32 / other4",
+      "speedups": {"linear": 33.938936959208895, "normalized": 201.09684086810267, "io": 32.0, "other": 4.0},
+      "projected_ms": 6.136184092059393,
+      "projected_tokens_per_second": 162.96773124751303
+    },
+    {
+      "name": "direction-major k32 / compiled attention / codec32 / other4",
+      "speedups": {"linear": 60.1034684049229, "normalized": 201.09684086810267, "io": 32.0, "other": 4.0},
+      "projected_ms": 5.164560997187243,
+      "projected_tokens_per_second": 193.62729969587474
+    },
+    {
+      "name": "direction-major k16 / compiled attention / codec32 / other4",
+      "speedups": {"linear": 83.07594553706505, "normalized": 201.09684086810267, "io": 32.0, "other": 4.0},
+      "projected_ms": 4.816050681513294,
+      "projected_tokens_per_second": 207.63901090961548
+    },
+    {
+      "name": "direction-major k16 / compiled attention / codec32 / other10",
+      "speedups": {"linear": 83.07594553706505, "normalized": 201.09684086810267, "io": 32.0, "other": 10.0},
+      "projected_ms": 2.917050681513294,
+      "projected_tokens_per_second": 342.8120074626968
+    },
+    {
+      "name": "direction-major k8 / compiled attention / codec32 / other10",
+      "speedups": {"linear": 103.2591199699135, "normalized": 201.09684086810267, "io": 32.0, "other": 10.0},
+      "projected_ms": 2.738825773840822,
+      "projected_tokens_per_second": 365.1199757031785
+    }
+  ],
+  "interpretation": "These are compositional targets from independently measured prototype regimes, not measured Origami end-to-end throughput. The shipped temporal census replaces assumed route occupancy with actual layer distributions."
+}
