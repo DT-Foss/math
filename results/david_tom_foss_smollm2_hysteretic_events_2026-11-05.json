@@ -1,0 +1,26 @@
+{
+  "source": "David Tom Foss Hugging Face CPU-performance job 6aecff1c0e0338d1bb80bd73, 2026-11-05",
+  "model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+  "parameters": 134515008,
+  "layers": 30,
+  "generated_tokens": 48,
+  "method": "stateful per-coordinate Schmitt-trigger / hysteretic activation codec, 6- and 8-bit frontiers",
+  "selected_high_fidelity_regime": {
+    "bits": 8,
+    "deadband_steps": 0.5,
+    "source_geometry": {
+      "attn_norm": {"event_fraction_median": 0.8828, "relative_l2_error_median": 0.0363},
+      "attn_out": {"event_fraction_median": 0.9436, "relative_l2_error_median": 0.0689},
+      "mlp_hidden": {"event_fraction_median": 0.9046, "relative_l2_error_median": 0.0656},
+      "mlp_norm": {"event_fraction_median": 0.9523, "relative_l2_error_median": 0.0247}
+    },
+    "all_linear_modules": {
+      "modules": 210,
+      "full_replay_ms_approx": 478.0,
+      "event_apply_ms_approx": 708.0,
+      "routed_speedup": 1.0,
+      "event_route_modules": 0
+    }
+  },
+  "conclusion": "Scalar hysteresis preserves substantially better activation fidelity than the low-bit frame codec but real transformer states still cross scalar thresholds nearly everywhere. Coordinate event sparsity is rejected as the global runtime representation; the useful state must be coupled across coordinates and/or consumer-quotiented."
+}
