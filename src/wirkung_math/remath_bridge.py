@@ -1,5 +1,5 @@
 from __future__ import annotations
-from dataclasses import dataclass
+from dataclasses import dataclass,replace
 from typing import Any
 
 
@@ -13,6 +13,8 @@ class RemathWirkungHint:
     preserves: tuple[str,...]
     destroys: tuple[str,...] = ()
     consumer_sensitive: bool = False
+    temporal_rewrite: str = ""
+    origami_state: tuple[str,...] = ()
 
 
 def _get(obj: Any, name: str, default: Any="") -> Any:
@@ -70,7 +72,7 @@ def classify_remath_formula(formula_or_node: Any) -> RemathWirkungHint:
             ("additive_summary",),
             ("additive_summary",),
         )
-    if any(k in low for k in ("max","min","argmax","argmin")):
+    if any(k in low for k in ("top-k","topk","argmax","argmin","max","min")):
         return RemathWirkungHint(
             name,domain,"order_reduction","certificate_or_reduction_tree",
             ("topk_or_tree",),
@@ -88,6 +90,46 @@ def classify_remath_formula(formula_or_node: Any) -> RemathWirkungHint:
     )
 
 
+def temporalize_hint(hint:RemathWirkungHint)->RemathWirkungHint:
+    """Attach the exact temporal Origami/Beast rewrite selected for a formula family."""
+    mapping={
+        "linear_map":(
+            "temporal_linear_portfolio",
+            ("previous_input","previous_output","activation_codes","basis_coefficients"),
+        ),
+        "normalization":(
+            "temporal_rmsnorm_multilinear",
+            ("previous_norm","previous_projection_outputs"),
+        ),
+        "normalized_bilinear":(
+            "compiled_partition_attention_or_dynamic_normalized",
+            ("base_query","quantized_key_signatures","partition_mass","partition_values"),
+        ),
+        "normalized_reduction":(
+            "compiled_partition_attention_or_lazy_reconciliation",
+            ("log_partition","numerator","signature_partitions"),
+        ),
+        "order_reduction":(
+            "certified_topk_router",
+            ("selected_experts","logit_intervals","certificate_margin"),
+        ),
+        "elementwise_nonlinearity":(
+            "quantized_temporal_activation",
+            ("previous_activation_codes","changed_code_support"),
+        ),
+        "additive_reduction":(
+            "streaming_sufficient_statistics",
+            ("sufficient_state",),
+        ),
+        "spectral_transform":(
+            "requested_response_basis",
+            ("requested_coefficients","sparse_input_delta"),
+        ),
+    }
+    rewrite,state=mapping.get(hint.family,("measure_then_route",()))
+    return replace(hint,temporal_rewrite=rewrite,origami_state=state)
+
+
 def annotate_remath_trace(trace: Any) -> list[dict[str,Any]]:
     """Return compact Wirkung annotations for Remath execution-graph nodes."""
     nodes=_get(trace,"nodes",[])
@@ -96,7 +138,7 @@ def annotate_remath_trace(trace: Any) -> list[dict[str,Any]]:
     out=[]
     for node in nodes:
         formula=_get(node,"formula",{})
-        hint=classify_remath_formula(formula)
+        hint=temporalize_hint(classify_remath_formula(formula))
         out.append({
             "node_id":_get(node,"id",""),
             "node_name":_get(node,"name",""),
@@ -104,7 +146,9 @@ def annotate_remath_trace(trace: Any) -> list[dict[str,Any]]:
             "canonical_name":hint.canonical_name,
             "wirkung_family":hint.family,
             "rewrite":hint.rewrite,
+            "temporal_rewrite":hint.temporal_rewrite,
             "persistent_state":list(hint.persistent_state),
+            "origami_state":list(hint.origami_state),
             "preserves":list(hint.preserves),
             "destroys":list(hint.destroys),
             "consumer_sensitive":hint.consumer_sensitive,
