@@ -1,0 +1,79 @@
+{
+  "source": "David Tom Foss VM controlled follow-up, 2026-11-05",
+  "lowrank_replacement_statistics": [
+    {
+      "edited_rows": 1024,
+      "d": 256,
+      "rank": 4,
+      "direct_midpoint_us": 4545.364,
+      "lowrank_materialized_us": 331.7295,
+      "lowrank_factor_only_us": 124.553,
+      "materialized_speedup": 13.702,
+      "factor_only_speedup": 36.493
+    },
+    {
+      "edited_rows": 1024,
+      "d": 256,
+      "rank": 16,
+      "direct_midpoint_us": 4333.7405,
+      "lowrank_materialized_us": 552.7925,
+      "lowrank_factor_only_us": 257.9185,
+      "materialized_speedup": 7.839,
+      "factor_only_speedup": 16.803
+    },
+    {
+      "edited_rows": 4096,
+      "d": 256,
+      "rank": 4,
+      "direct_midpoint_us": 21487.9325,
+      "lowrank_materialized_us": 918.4275,
+      "lowrank_factor_only_us": 524.029,
+      "materialized_speedup": 23.397,
+      "factor_only_speedup": 41.005
+    },
+    {
+      "edited_rows": 4096,
+      "d": 512,
+      "rank": 4,
+      "direct_midpoint_us": 64446.569,
+      "lowrank_materialized_us": 2848.3445,
+      "lowrank_factor_only_us": 1314.2195,
+      "materialized_speedup": 22.626,
+      "factor_only_speedup": 49.038
+    }
+  ],
+  "delta_native_from_factors": [
+    {
+      "edited_rows": 1024,
+      "d": 256,
+      "rank": 4,
+      "materialize_delta_then_factor_us": 351.0985,
+      "delta_native_us": 137.2815,
+      "speedup": 2.5575077486769886
+    },
+    {
+      "edited_rows": 4096,
+      "d": 256,
+      "rank": 4,
+      "materialize_delta_then_factor_us": 5575.4635,
+      "delta_native_us": 785.1415,
+      "speedup": 7.101221244832938
+    },
+    {
+      "edited_rows": 4096,
+      "d": 512,
+      "rank": 4,
+      "materialize_delta_then_factor_us": 12904.603,
+      "delta_native_us": 2302.086,
+      "speedup": 5.605612909335272
+    },
+    {
+      "edited_rows": 4096,
+      "d": 512,
+      "rank": 16,
+      "materialize_delta_then_factor_us": 18974.581,
+      "delta_native_us": 3967.7835,
+      "speedup": 4.7821613754883545
+    }
+  ]
+}

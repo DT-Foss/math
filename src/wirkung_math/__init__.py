@@ -29,6 +29,14 @@ from .lifetime import ExecutionRegime, HorizonPlanner
 from .demand_linear import sparse_requested_linear_delta
 from .plan_graph import PlanTransition, PlanResult, RepresentationPlanGraph
 from .lazy_gram import LazyGramState
+from .replacement import replacement_statistics_delta, replacement_gram_delta, replacement_cross_delta, lowrank_replacement_statistics, lowrank_delta_statistics_from_base
+from .demand_slice import DemandSlice, delta_demand_slice
+from .state_quotient import AdditiveStatsFootprint, StateQuotient
+from .native_rank1 import NativeRank1StatsState, build_rank1_stats_kernel
+from .cold_state import ColdRowFetchModel, ColdBackedDeltaPlan
+from .adaptive_stats import AdaptiveStatsState
+from .covariance import covariance_replacement_delta
+from .local_demand import LayerDemandRegion, local_chain_delta_demand, required_area_sum
 from .hardware_router import (
     ConsumerAwareKernelRouter, ConsumerRequirement, DirtyV100Calibration,
     KernelMaterializationCalibration, KernelSolveCalibration,
@@ -58,6 +66,10 @@ __all__ = [
     "LocalGraphDependency","LocalResidencyChoice","LocalResidencyPlanner",
     "LazyNormalizedKVState","ExecutionRegime","HorizonPlanner","sparse_requested_linear_delta",
     "PlanTransition","PlanResult","RepresentationPlanGraph","LazyGramState",
+    "replacement_statistics_delta","replacement_gram_delta","replacement_cross_delta","lowrank_replacement_statistics","lowrank_delta_statistics_from_base",
+    "DemandSlice","delta_demand_slice","AdditiveStatsFootprint","StateQuotient",
+    "NativeRank1StatsState","build_rank1_stats_kernel","ColdRowFetchModel","ColdBackedDeltaPlan","AdaptiveStatsState","covariance_replacement_delta",
+    "LayerDemandRegion","local_chain_delta_demand","required_area_sum",
     "ConsumerAwareKernelRouter","ConsumerRequirement","DirtyV100Calibration",
     "KernelMaterializationCalibration","KernelSolveCalibration",
     "SparseSpectrumV100Calibration","NormalizedQueryV100Calibration",

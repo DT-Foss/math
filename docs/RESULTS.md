@@ -482,3 +482,102 @@ K/V updates are appended to a versioned edit log; only requested query rows reco
 Maximum FP32 error in the controlled check was ~4.98e-8.
 
 This composes streaming state with demand sparsity: unrequested outputs may remain stale at zero maintenance cost and are reconciled exactly when accessed.
+
+
+## E210–E220 continuation — direct V100 scaling and >1000× point
+
+Machine-readable provenance: `results/imported_e210_e220_2026-11-05.json`.
+
+### Composed statistics pipeline versus resident V100
+
+`X -> Gram -> 16-RHS Solve -> Logdet`, with the CPU consuming only changed rows through one shared low-rank delta:
+
+- n=1,048,576: **50.48× / 48.24× / 34.07×** for 1/4/16 edits;
+- n=4,194,304: **188.05×** for 1 edit and **130.48×** for 16;
+- n=8,388,608, one edit: **225.93×**.
+
+Relative errors in the supplied runs were around 1e-14.
+
+### Local nonlinear residual graph scaling
+
+With the optimized rolling two-state V100/cuDNN executor:
+
+- 3072²: **42.20×**
+- 4096²: **63.37×**
+- 6144²: **150.25×**
+- 8192²: **235.17×**
+
+At 8192²: 755.07 ms V100 full versus 3.21 ms CPU dirty delta; relative error ~1.8e-7.
+
+### Moments + Gram direct record
+
+The GPU baseline was strengthened to fused `var_mean + Gram`.
+
+At n=33,554,432,d=64,e=64:
+
+- V100 full: 61.099 ms
+- CPU delta: 0.0530 ms
+- **CPU/V100 = 1152.60×**
+- relative error ~3.9e-13.
+
+A two-V100 row partition measured 70.55 ms versus 0.125 ms CPU delta, still **562.88×**.
+
+With one changed row, the supplied generic full-run measurement reached **1627.18×** (61.092 ms versus 0.0375 ms). The later isolated specialized rank-1 NumPy path measured 21.43 us, but a full direct V100 validation of that specialization was not included in the supplied excerpt.
+
+## David Tom Foss follow-up: midpoint/difference replacement algebra
+
+Machine-readable record: `results/david_tom_foss_midpoint_state_quotient_2026-11-05.json`.
+
+For row replacement, define `D=new-old`, `P=new+old`:
+
+- `Delta S = sum(D)`
+- `Delta Q = sum(D*P)`
+- `Delta G = 1/2(D^T P + P^T D)`.
+
+This replaces two Gram products with one GEMM plus symmetrization.
+
+On the David Tom Foss VM, d=64, single-thread BLAS, the midpoint form was **1.40×–1.74×** faster over e=1..64 than the direct old/new quadratic difference.
+
+In a conditioning stress test with baseline scale 1e6 and edit scale 1e-4, max Gram-delta error versus long-double dropped from 6.78e-2 to 3.98e-5: about **1700× less numerical error**.
+
+## David Tom Foss follow-up: coherent low-rank replacement statistics
+
+Machine-readable record: `results/david_tom_foss_lowrank_replacement_stats_2026-11-05.json`.
+
+If `D=new-old=A B^T` has rank r, let `C=A^T(new+old)`. Then:
+
+- `Delta S = B sum(A)`
+- `Delta Q_j = <B[j,:], C[:,j]>`
+- `Delta G = 1/2(B C + C^T B^T)`
+- `rank(Delta G) <= 2r`, independent of the number of changed rows.
+
+Measured examples versus direct midpoint delta statistics:
+
+- e=1024,d=256,r=4: **13.7×** with dense Gram materialized; **36.5×** when keeping the factor;
+- e=4096,d=256,r=4: **23.4× / 41.0×**;
+- e=4096,d=512,r=4: **22.6× / 49.0×**.
+
+If the update already arrives as factors A,B, the runtime can avoid materializing both D and new rows. That delta-native path was a further **2.6×–7.1×** faster than materializing the factored delta first in the controlled follow-up.
+
+## David Tom Foss follow-up: native rank-1 persistent statistics state
+
+Machine-readable record: `results/david_tom_foss_native_rank1_stats_2026-11-05.json`.
+
+A specialized native midpoint kernel updates persistent `S,Q,G` in place for one row. On the David Tom Foss VM with d=64, pre-bound pointers:
+
+- dense Gram state: ~**1.74 us median**
+- packed-upper Gram variant: ~**1.58 us median**.
+
+These are microkernel measurements on a different CPU from the V100 box and are therefore targets for direct box validation, not direct V100 speedup claims.
+
+## Hot-state quotient
+
+For the 33,554,432×64 FP64 statistics workload:
+
+- raw data: exactly **16 GiB**;
+- sum + sumsq + dense 64×64 Gram: **33 KiB**;
+- hot-state reduction: **508,400×**.
+
+Only 32 KiB of old rows are required for a 64-row replacement. A cold-row store at 1 GB/s would add only ~0.033 ms to the measured 0.053 ms delta compute; against 61.099 ms V100 full this remains over **700×** in the simple bandwidth model.
+
+This means sufficient-state execution can collapse both compute and hot-memory footprint.
