@@ -55,3 +55,76 @@ class LowRankUpdateLedger:
 
     def solve(self,rhs:np.ndarray)->np.ndarray:
         return self.cache().apply_inverse(rhs)
+
+
+@dataclass
+class IncrementalWoodburyLedger:
+    """
+    Streaming A <- A + U_i V_i^T state with an incrementally maintained Woodbury core.
+
+    Old A^-1 U columns are never recomputed. Appending a q-rank update needs only
+    solve_base(U_new), O(n*r*q) cross terms, and a q×q Schur update of M^-1 where
+
+      M = I + V^T A_base^-1 U.
+
+    Solve then uses one base solve plus the accumulated compact correction.
+    """
+    solve_base:object
+    U:np.ndarray|None=None
+    V:np.ndarray|None=None
+    AU:np.ndarray|None=None
+    M_inv:np.ndarray|None=None
+
+    @property
+    def rank(self)->int:
+        return 0 if self.U is None else int(self.U.shape[1])
+
+    def append(self,U_new:np.ndarray,V_new:np.ndarray)->None:
+        U_new=np.asarray(U_new,dtype=np.float64)
+        V_new=np.asarray(V_new,dtype=np.float64)
+        if U_new.shape!=V_new.shape or U_new.ndim!=2:
+            raise ValueError("U and V must have same n×r shape")
+        AU_new=np.asarray(self.solve_base(U_new),dtype=np.float64)
+        q=U_new.shape[1]
+
+        if self.U is None:
+            D=np.eye(q)+V_new.T@AU_new
+            self.U=U_new.copy();self.V=V_new.copy();self.AU=AU_new
+            self.M_inv=np.linalg.inv(D)
+            return
+
+        assert self.V is not None and self.AU is not None and self.M_inv is not None
+        A=self.V.T@AU_new
+        B=V_new.T@self.AU
+        D=np.eye(q)+V_new.T@AU_new
+        S=D-B@self.M_inv@A
+        S_inv=np.linalg.inv(S)
+
+        MI=self.M_inv
+        MIA=MI@A
+        BMI=B@MI
+        top_left=MI+MIA@S_inv@BMI
+        top_right=-MIA@S_inv
+        bottom_left=-S_inv@BMI
+        bottom_right=S_inv
+        self.M_inv=np.block([[top_left,top_right],[bottom_left,bottom_right]])
+        self.U=np.concatenate([self.U,U_new],axis=1)
+        self.V=np.concatenate([self.V,V_new],axis=1)
+        self.AU=np.concatenate([self.AU,AU_new],axis=1)
+
+    def solve(self,rhs:np.ndarray)->np.ndarray:
+        rhs=np.asarray(rhs,dtype=np.float64)
+        if self.U is None:
+            return np.asarray(self.solve_base(rhs),dtype=np.float64)
+        assert self.V is not None and self.AU is not None and self.M_inv is not None
+        vector=rhs.ndim==1
+        B=rhs[:,None] if vector else rhs
+        z=np.asarray(self.solve_base(B),dtype=np.float64)
+        out=z-self.AU@(self.M_inv@(self.V.T@z))
+        return out[:,0] if vector else out
+
+    def materialize_update(self)->np.ndarray:
+        if self.U is None:
+            raise ValueError("empty ledger")
+        assert self.V is not None
+        return self.U@self.V.T
