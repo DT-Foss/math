@@ -1,0 +1,12 @@
+{
+  "source":"Sol VM controlled single-thread benchmark, 2026-11-05",
+  "environment":{"blas_threads":1,"dtype":"float64"},
+  "sparse_feature_rbf":[
+    {"n":32768,"d":256,"changed_features":1,"full_ms":27.760178,"delta_ms":0.504649,"speedup":55.00888340212702,"max_abs_error":2.6469779601696886e-23},
+    {"n":32768,"d":256,"changed_features":4,"full_ms":22.776066,"delta_ms":1.317133,"speedup":17.292153487916558,"max_abs_error":2.3988237764037803e-23},
+    {"n":65536,"d":256,"changed_features":1,"full_ms":59.30721,"delta_ms":0.979174,"speedup":60.56861191167249,"max_abs_error":3.639594695233322e-23},
+    {"n":65536,"d":256,"changed_features":4,"full_ms":47.840397,"delta_ms":4.197168,"speedup":11.39825639574113,"max_abs_error":1.1166938269465874e-23},
+    {"n":65536,"d":256,"changed_features":16,"full_ms":48.195232,"delta_ms":15.691802,"speedup":3.0713637605164785,"max_abs_error":2.274746684520826e-23}
+  ],
+  "associative_max_tree":{"n":1048576,"full_reduce_us_median":108.513,"tree_update_us_median":5.308,"speedup":20.443293142426526,"exact":true}
+}

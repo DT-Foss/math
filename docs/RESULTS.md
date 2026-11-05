@@ -48,9 +48,9 @@ Upper-bound search:
 - best reported speedup: 2.453×;
 - errors about 1e-7.
 
-## Executable verification on ChatGPT VM — 2026-11-05
+## Executable verification on Sol VM — 2026-11-05
 
-Machine-readable record: `results/chatgpt_vm_2026-11-05.json`.
+Machine-readable record: `results/sol_vm_2026-11-05.json`.
 
 Environment: AMD EPYC 9V74, NumPy 2.3.5, Python 3.13.5, single-thread BLAS/OMP.
 
@@ -162,7 +162,7 @@ For a narrow projection `G=sum_i x_i W`, the runtime uses:
 
 `G' = G + sum(delta_dirty) W`.
 
-Independent executable check on the ChatGPT VM (AMD EPYC 9V74, Float64), n=131072, d=64, 256 dirty rows:
+Independent executable check on the Sol VM (AMD EPYC 9V74, Float64), n=131072, d=64, 256 dirty rows:
 
 - cached global sum update: **649.36×** vs full reduction;
 - cached 8-wide projected reduction: **448.87×** vs full reduction+projection;
@@ -253,12 +253,12 @@ RBF -> dynamic solve:
 - n=512: 22–71×;
 - n=1024: 47–167×;
 - n=2048: **382× / 291× / 132×** for e=1/4/16.
-- n=4096 was announced as the next CPU-box point; no result was supplied yet.
+- n=4096: **801× / 640× / 230×** for e=1/4/16, all correct with residuals ~1e-13.
 
 
-## ChatGPT VM cross-check — dynamic normalized bilinear state
+## Sol VM cross-check — dynamic normalized bilinear state
 
-Machine-readable record: `results/chatgpt_vm_dynamic_bilinear_2026-11-05.json`.
+Machine-readable record: `results/sol_vm_dynamic_bilinear_2026-11-05.json`.
 
 AMD EPYC 9V74, NumPy/OpenBLAS 5 threads, FP32, d=64. Cached old Q/K/V output and log-partitions are persistent state; setup/state copies were excluded from the timed update.
 
@@ -269,3 +269,110 @@ AMD EPYC 9V74, NumPy/OpenBLAS 5 threads, FP32, d=64. Cached old Q/K/V output and
 - max absolute output error <= 2.95e-7.
 
 This composes pairwise row/column change geometry with the normalized sufficient-statistic state rather than rebuilding the full n×n bilinear map.
+
+
+## Streaming state + direct resident V100 comparisons — 2026-11-05
+
+Machine-readable provenance: `results/imported_cpu_v100_streaming_2026-11-05.json` and `results/direct_v100_vs_cpu_delta_2026-11-05.json`.
+
+### Persistent nonlinear dirty state
+
+Thirty consecutive local edits were applied to the already-updated cache; every step was checked against full recomputation of the current state.
+
+- median full: 90.438 ms
+- median delta: 2.296 ms
+- median paired speedup: **39.46×**
+- worst step: **31.19×**
+- max relative error across the stream: ~3.0e-10
+- no growing error trend observed.
+
+This establishes the dirty executor as a persistent state transition engine rather than a one-shot cache benchmark.
+
+### Controlled dirty-area scaling
+
+For channels=16, layers=12, patch=8, the final dirty region stays at 1024 cells while full area grows:
+
+- 256²: 16.90×
+- 512²: 70.92×
+- 1024²: 521.92×
+- 1536²: **1158.35×**
+
+At the large sizes, measured executor speedup is roughly half the ideal area ratio.
+
+### Direct CPU delta versus resident V100
+
+GPU inputs/weights are resident and host transfer is excluded.
+
+- local nonlinear residual graph: CPU delta wins **5.5× to 19×** in the supplied large-size comparisons;
+- moments + full Gram: 0.0695 ms CPU delta vs 5.115 ms V100 full = **73.6×**;
+- solve + logdet after low-rank change: 0.809 ms vs 18.27 ms = **22.6×**.
+
+For the 12-layer patch-8 dirty graph, measured small-area points give a hardware crossover bracket of **320 < N* < 384**. Sol fits the 256–512 V100 points as
+
+`T_V100(N) ~= 0.1505 ms + 1.2262e-5 ms * N²`
+
+with R²≈0.99956, predicting N*≈358; direct interpolation of the 320/384 time difference gives N*≈354.6.
+
+### Dense RBF materialization versus structured RBF solve
+
+At n=8192,d=64 when the consumer demands the full K matrix:
+
+- e=1: CPU changed-row/column materialization wins 3.75×;
+- e=8: V100 full K wins;
+- e=64: V100 full K wins decisively.
+
+The current interpolated dense-materialization crossover is ~6.7 edits.
+
+But at n=4096 with an 8-RHS solve, keeping the same kernel change as rank<=2e and feeding Woodbury directly gives:
+
+- e=1: **16.57×** CPU over V100 full kernel+solve;
+- e=4: **11.51×**;
+- e=16: **4.54×**;
+- solution differences are ~1e-13.
+
+The router must therefore include the consumer's required representation; edit count alone is insufficient.
+
+
+## Sol VM cross-structure checks — 2026-11-05
+
+Machine-readable record: `results/sol_vm_cross_structure_2026-11-05.json`.
+Executable benchmark: `experiments/sol_cross_structure_bench.py`.
+
+### Sparse-feature RBF
+
+A single changed point with only `s` changed feature coordinates updates its full RBF row from cached squared distances in `O(ns)` rather than `O(nd)`.
+
+Controlled Float64, single-BLAS-thread results:
+
+- n=32,768,d=256,s=1: **55.01×**
+- n=32,768,d=256,s=4: **17.29×**
+- n=65,536,d=256,s=1: **60.57×**
+- n=65,536,d=256,s=4: **11.40×**
+- n=65,536,d=256,s=16: **3.07×**
+
+Maximum absolute errors were below 4e-23 in these runs. The resulting pairwise matrix change remains row/column-supported with rank <=2e, so this feature-sparse front-end composes directly with the existing Woodbury solver path.
+
+### Associative reduction tree
+
+For n=1,048,576 scalar values, an exact max reduction stored as a segment tree gave:
+
+- full NumPy max median: 108.513 us
+- point-update tree path: 5.308 us
+- **20.44×**
+- exact root aggregate.
+
+This validates a separate incremental class for associative reductions that do not need an algebraic inverse.
+
+
+### Sol streaming Woodbury-core check
+
+Machine-readable record: `results/sol_vm_streaming_woodbury_2026-11-05.json`.
+
+For d=1024, 8 RHS and sequential rank-1 updates on top of a cached Cholesky base solver, the incrementally maintained Woodbury core keeps old `A^-1 U` columns and updates only the new block:
+
+- accumulated rank 16: solve **13.46×** vs full refactor+solve; update+solve **6.13×**;
+- accumulated rank 32: solve **17.50×**; update+solve **8.36×**;
+- append cost remains ~1.5–2.5 ms over the measured range;
+- max absolute errors stay below 7e-16.
+
+This closes the persistent-state gap for the low-rank solver family as well as for dirty-local execution.
