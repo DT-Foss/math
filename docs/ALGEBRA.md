@@ -90,3 +90,84 @@ For a narrow linear consumer `G=sum_i x_i W`:
 Only dirty terminal rows are read.
 
 Implementation: `dirty.update_global_sum`, `dirty.update_projected_global_sum`.
+
+
+## A010 — Additive sufficient-statistic replacement
+
+For `T=sum_i phi(x_i)` and replacement set `U`:
+
+`T' = T - sum_{i in U} phi(x_i) + sum_{i in U} phi(x'_i)`.
+
+This covers sums, component moments, Gram/scatter, cross-covariance and normal equations.
+
+Implementation: `statistics.SufficientStatisticsState`, `statistics.NormalEquationsState`.
+
+## A011 — Symmetric Gram replacement delta
+
+`Delta G = X'_U^T X'_U - X_U^T X_U = U C U^T`
+
+with nominal rank at most `2|U|`. The nominal factor is rank-revealed before downstream use.
+
+Implementation: `symmetric.SymmetricLowRankDelta`.
+
+## A012 — Shared Woodbury fanout
+
+For `A'=A+UCU^T`, cache `A^-1U` and `M=I+C U^T A^-1U` once.
+
+`A'^{-1}B = A^-1B - A^-1U M^-1 C U^T A^-1B`.
+
+The same cache supplies solve, inverse action, logdet and quadratic forms. No `C^-1` is required.
+
+Implementation: `symmetric.WoodburyCache`.
+
+## A013 — Pairwise row/column delta
+
+If only `e` points of a symmetric pairwise matrix change and `R=Delta A[U,:]`:
+
+`Delta A = S R + R^T S^T - S R_UU S^T`.
+
+Therefore `rank(Delta A) <= 2e`.
+
+Implementation: `kernel.RowColumnDelta`.
+
+## A014 — Implicit selector Woodbury
+
+The pairwise selector `S` is not materialized. Indexed inverse columns `A^-1[:,U]` and `A^-1 R^T` generate the Woodbury state directly.
+
+Implementation: `kernel.RowColumnWoodbury`.
+
+## A015 — Sparse-feature RBF row update
+
+For `x_u -> x_u+delta` with `delta` supported on only `s` features:
+
+`d_j'^2 = d_j^2 + 2 delta^T(x_u-x_j) + ||delta||^2`.
+
+With cached old distances, an RBF row costs `O(ns)` rather than `O(nd)`.
+
+Implementation: `kernel.rbf_single_point_sparse_feature_update`.
+
+## A016 — Dynamic Fourier response
+
+A sparse time-domain replacement updates a cached DFT by adding the analytic Fourier response of each point delta. Basis columns are generated on demand.
+
+A checkpointed radix-2 DAG further shares overlapping downstream butterfly paths between multiple edits.
+
+Implementation: `spectral.SparseDFTState`, `spectral.ButterflyFFTState`.
+
+## A017 — Dynamic block Schur update
+
+For `A_new=[[A,B],[B^T,D]]`, define Schur complement `S=D-B^T A^-1 B`. Solve, inverse action and logdet follow from the cached block state without rebuilding the full factorization.
+
+Implementation: `block.BlockAppendCache`.
+
+## A018 — SPD Cholesky update/downdate
+
+A Gram row replacement is a sequence of `-x_old x_old^T` downdates and `+x_new x_new^T` updates. Maintaining Cholesky directly gives solve and logdet without storing an explicit inverse.
+
+Implementation: `cholesky.CholeskyState`.
+
+## A019 — Representation switching
+
+Delta structure is operator-relative. An operator may convert one structure into another rather than preserving or destroying it globally.
+
+Implementation scaffold: `delta_ir.DeltaDescriptor`.
