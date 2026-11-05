@@ -171,3 +171,49 @@ Implementation: `cholesky.CholeskyState`.
 Delta structure is operator-relative. An operator may convert one structure into another rather than preserving or destroying it globally.
 
 Implementation scaffold: `delta_ir.DeltaDescriptor`.
+
+
+## A020 — Dynamic normalized bilinear row/column update
+
+Replacing `e` rows of Q/K/V changes:
+- `e` complete bilinear score rows from Q;
+- `e` score columns on every clean row from K;
+- `e` value rows from V.
+
+Clean rows use the cached normalized output/log-partition replacement algebra. Only changed query rows and numerically gated fallback rows require full row recomputation.
+
+Implementation: `bilinear.DynamicNormalizedBilinearState`.
+
+## A021 — Associative reduction tree
+
+For any associative binary operator, store a balanced reduction tree. A point replacement changes only one root path, requiring `O(log n)` operator applications; the full aggregate remains at the root.
+
+This covers reductions without an algebraic inverse and noncommutative transfer/matrix-product chains.
+
+Implementation: `reduction.SegmentReductionTree`.
+
+## A022 — Event coalescing
+
+Repeated writes to one row are reduced to the first old value and the final new value before downstream algebra. If the final value returns to the original, the edit vanishes.
+
+Implementation: `coalesce.RowReplacementLog`.
+
+## A023 — General nonsymmetric Woodbury
+
+For `A'=A+UV^T`:
+
+`A'^{-1}=A^{-1}-A^{-1}U(I+V^T A^{-1}U)^{-1}V^T A^{-1}`.
+
+The same small core also supplies the determinant lemma. No symmetry assumption is required.
+
+Implementation: `woodbury.GeneralWoodburyCache`.
+
+## A024 — Selective factor materialization
+
+For `Delta X = AB^T`, a consumer requesting only rows `I` and columns `J` evaluates
+
+`Delta X[I,J] = A[I] B[J]^T`
+
+without constructing the full delta.
+
+Implementation: `FactorDelta.materialize_block`.
