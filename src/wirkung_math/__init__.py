@@ -26,6 +26,7 @@ from .update_ledger import LowRankUpdateLedger, IncrementalWoodburyLedger
 from .cacheless_local import LocalGraphDependency, LocalResidencyChoice, LocalResidencyPlanner
 from .lazy_normalized import LazyNormalizedKVState
 from .lifetime import ExecutionRegime, HorizonPlanner
+from .demand_linear import sparse_requested_linear_delta
 from .hardware_router import (
     ConsumerAwareKernelRouter, ConsumerRequirement, DirtyV100Calibration,
     KernelMaterializationCalibration, KernelSolveCalibration,
@@ -52,7 +53,7 @@ __all__ = [
     "AreaCostModel","DirtyGraphCompiler2D","DirtyPlan2D","Rect","schedule_rectangles_optimal",
     "LowRankUpdateLedger","IncrementalWoodburyLedger",
     "LocalGraphDependency","LocalResidencyChoice","LocalResidencyPlanner",
-    "LazyNormalizedKVState","ExecutionRegime","HorizonPlanner",
+    "LazyNormalizedKVState","ExecutionRegime","HorizonPlanner","sparse_requested_linear_delta",
     "ConsumerAwareKernelRouter","ConsumerRequirement","DirtyV100Calibration",
     "KernelMaterializationCalibration","KernelSolveCalibration",
 ]
