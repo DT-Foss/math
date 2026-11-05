@@ -68,16 +68,13 @@ class CompiledPartitionAttention:
         if a.shape!=(self.signature_width,):
             raise ValueError("alpha shape mismatch")
         z=self.signatures@a
-        # Include group mass in the stability shift. Empty groups never exist.
-        logmass=np.log(self.mass)+z
-        shift=float(np.max(logmass))
-        factor=np.exp(z-shift)
-        denominator=float(factor@self.mass)
-        numerator=factor@self.weighted_values
-        output=numerator/denominator
-        log_partition=self.base_shift+shift+float(np.log(denominator*np.exp(-shift)))
-        # Algebraically simpler and more stable expression:
-        log_partition=self.base_shift+shift+float(np.log(np.sum(np.exp(logmass-shift))))
+        log_group_mass=np.log(self.mass)+z
+        shift=float(np.max(log_group_mass))
+        normalized_group_mass=np.exp(log_group_mass-shift)
+        group_means=self.weighted_values/self.mass[:,None]
+        denominator=float(normalized_group_mass.sum())
+        output=(normalized_group_mass@group_means)/denominator
+        log_partition=self.base_shift+shift+float(np.log(denominator))
         return output,log_partition
 
     def append(
