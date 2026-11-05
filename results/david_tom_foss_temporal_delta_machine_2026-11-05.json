@@ -1,0 +1,50 @@
+{
+  "source": "David Tom Foss VM controlled temporal-delta prototype, 2026-11-05",
+  "environment": {
+    "cpu": "AMD EPYC 9V74 80-Core Processor",
+    "numpy": "2.3.5",
+    "blas_threads": 1
+  },
+  "fused_rmsnorm_linear": {
+    "shape": {"input": 2560, "output": 2560, "dtype": "float32"},
+    "full_ms": 1.2157855,
+    "cases": [
+      {"changed_coordinates": 1, "delta_ms": 0.0352495, "speedup": 34.49085802635498},
+      {"changed_coordinates": 4, "delta_ms": 0.0852725, "speedup": 14.257650473482071},
+      {"changed_coordinates": 8, "delta_ms": 0.1616875, "speedup": 7.519353691534596},
+      {"changed_coordinates": 16, "delta_ms": 0.3528855, "speedup": 3.44526907452984},
+      {"changed_coordinates": 32, "delta_ms": 0.6775035, "speedup": 1.794508072652023},
+      {"changed_coordinates": 64, "delta_ms": 1.4768435, "speedup": 0.8232324548945098}
+    ],
+    "max_abs_error_order": "2e-6 FP32"
+  },
+  "cross_lane_lowrank_linear": {
+    "shape": {"lanes": 80, "input": 2048, "output": 2048, "dtype": "float32"},
+    "full_batch_ms": 9.276868,
+    "cases": [
+      {"delta_rank": 1, "delta_ms": 1.078282, "speedup": 8.603378337021299},
+      {"delta_rank": 2, "delta_ms": 2.656123, "speedup": 3.492634941981226},
+      {"delta_rank": 4, "delta_ms": 2.933712, "speedup": 3.1621604301990107},
+      {"delta_rank": 8, "delta_ms": 3.45457, "speedup": 2.685390077491555},
+      {"delta_rank": 16, "delta_ms": 3.7206525, "speedup": 2.4933443797828474},
+      {"delta_rank": 32, "delta_ms": 5.262013, "speedup": 1.7629884228716275}
+    ]
+  },
+  "certified_moe_router": {
+    "shape": {"experts": 384, "input": 2560, "top_k": 6, "changed_coordinates": 8},
+    "full_router_ms": 0.487581,
+    "certificate_ms": 0.026122,
+    "speedup": 18.66553097006355,
+    "semantic": "exact top-k certificate; full refresh on interval failure"
+  },
+  "compiled_partition_attention": {
+    "shape": {"context": 131072, "value_width": 64, "temporal_signature_width": 4},
+    "signature_alphabet": "integer -3..3",
+    "occupied_groups": 1520,
+    "dense_ms": 4.961964,
+    "compiled_ms": 0.0246745,
+    "speedup": 201.09684086810267,
+    "max_abs_error": 1.1102230246251565e-16,
+    "scope": "synthetic exact structure benchmark; Origami trace census determines real occupancy"
+  }
+}

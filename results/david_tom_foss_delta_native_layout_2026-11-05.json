@@ -1,0 +1,25 @@
+{
+  "source": "David Tom Foss VM controlled direction-major weight-layout benchmark, 2026-11-05",
+  "shape": {"input": 2560, "output": 2560, "dtype": "float32", "blas_threads": 1},
+  "layout": "contiguous input-direction pages (W transpose packed); mathematical weights unchanged",
+  "fused_rmsnorm_linear": {
+    "full_ms": 1.235547,
+    "cases": [
+      {"changed_coordinates": 1, "delta_ms": 0.012437, "speedup": 99.34445605853502},
+      {"changed_coordinates": 4, "delta_ms": 0.010182, "speedup": 121.34619917501473},
+      {"changed_coordinates": 8, "delta_ms": 0.0119655, "speedup": 103.2591199699135},
+      {"changed_coordinates": 16, "delta_ms": 0.0148725, "speedup": 83.07594553706505},
+      {"changed_coordinates": 32, "delta_ms": 0.020557, "speedup": 60.1034684049229},
+      {"changed_coordinates": 64, "delta_ms": 0.036405, "speedup": 33.938936959208895},
+      {"changed_coordinates": 128, "delta_ms": 0.1248455, "speedup": 9.896608207744773}
+    ]
+  },
+  "delta_only_layout_gain_over_row_major_gather": [
+    {"changed_coordinates": 1, "gain": 4.439129775621589},
+    {"changed_coordinates": 4, "gain": 16.996576124172563},
+    {"changed_coordinates": 8, "gain": 24.434349404711643},
+    {"changed_coordinates": 16, "gain": 40.19277925306514},
+    {"changed_coordinates": 32, "gain": 45.80700870207976}
+  ],
+  "scope": "dense reference layout benchmark; Origami implementation must expose the same direction-major access from compressed pages instead of duplicating dense weights"
+}

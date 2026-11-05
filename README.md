@@ -27,8 +27,15 @@ The goal is not to make a CPU imitate a GPU kernel-by-kernel. The goal is to rep
 - lazy normalized query reconciliation;
 - lazy Gram state with streaming Solve/Logdet consumers;
 - whole-graph representation/device shortest-path planning;
+- an **Origami Temporal Delta Machine** for token-to-token state transitions;
+- exact temporal Linear, RMSNorm→multi-projection and quantized activation-code updates;
+- a delta-native input-direction weight layout and compressed-codec callback ABI;
+- certified MoE top-k routing;
+- flat and tensor-train compiled partition-function attention;
+- cross-lane/speculative low-rank factorization;
+- a shipped Origami/Beast temporal-delta census CLI;
+- Remath semantic auto-compilation into temporal rewrite families;
 - Remath portability/observability integration receipts under `tools/remath/`;
-- E172–E177 plus E186–E187 executable experiments, with E185 CPU-box provenance;
 - regression tests for every exact rewrite;
 - machine-readable result records.
 
@@ -42,8 +49,12 @@ The goal is not to make a CPU imitate a GPU kernel-by-kernel. The goal is to rep
 - `docs/RESULTS.md` — chronological measured results
 - `docs/HARDWARE_ROUTER.md` — measured CPU↔GPU routing rules
 - `docs/FINAL_SYNTHESIS_2026-11-05.md` — final breakthrough map and overlooked levers
+- `docs/ORIGAMI_TEMPORAL_DELTA_MACHINE_2026-11-05.md` — transformer state-machine architecture
+- `docs/ORIGAMI_DELTA_NATIVE_LAYOUT_2026-11-05.md` — direction-major codec layout and 160–365 tok/s architecture budgets
+- `docs/ORIGAMI_TEMPORAL_IP_CLAIM_MAP_2026-11-05.md` — technical invention-disclosure map
 - `tools/remath/` — leak-safe Remath portability integration
 - `results/` — machine-readable imported/generated records
+- `scripts/origami_temporal_census.py` — actual Origami/Beast temporal geometry census
 - `scripts/run_and_record.py` — reproducible experiment recorder
 
 ## Run
@@ -67,48 +78,39 @@ The factorized route beats direct sparse exactly when
 
 `r < ed/(e+d)`.
 
-The runtime treats this as a routing law, not as commentary.
+The temporal transformer extension adds two more independent axes:
+
+- changed activation/code directions;
+- outputs/queries actually requested.
+
+Its core execution law is:
+
+`work ∝ temporal information change × requested output × surviving structure`.
 
 ## Current measured highlights
 
-Imported CPU-box work:
+Direct resident-V100 records include:
 
-- normalized update: up to 69.97× in the supplied E168 cases;
-- dirty/local operator composition: 301.679× best supplied case;
-- low-rank path: 2.453× best supplied E168 case.
+- nonlinear local residual graph: **235.17×** at 8192²;
+- moments + Gram: **1152.60×** for 64 changed rows at 33,554,432×64 FP64;
+- supplied one-row full run: **1627.18×**;
+- composed Gram + 16-RHS Solve + Logdet: **225.93×**;
+- RBF→Solve: CPU structured route still wins at 16 changed points.
 
-Executable verification in this repository:
+Origami Temporal Delta Machine controlled prototypes include:
 
-- E174 factor propagation across six linear layers: 54.89× in the recorded VM run, with a preceding run at 113.18×;
-- E175 RMSNorm and LayerNorm rewrites agree with full recomputation to ~1e-15;
-- E177 compacts nominal rank 128 to rank 8 without dense materialization;
-- E185 preserves disconnected cones for 50.9×–196.6× vs full recomputation in the supplied CPU-box cases;
-- E186 learns a 167.55-cell merge/split crossover and drives an optimal component partitioner;
-- E187 preserves the dirty-path gain through global consumers: 649.36× cached sum update and 448.87× projected update on the recorded VM run.
+- direction-major exact RMSNorm→Linear: **60–121×** for 4–32 changed directions at d=2560;
+- exact certified Beast-sized MoE router: **18.67×**;
+- exact compiled partition attention: **201.10×** on a 131k-context discrete-signature workload;
+- quantized SwiGLU→down: **11.73×** when 0.25% of activation codes change;
+- 80-lane shared temporal low rank: **8.60×** at rank 1.
 
-See `docs/FINAL_SYNTHESIS_2026-11-05.md` for the final synthesis, `docs/INCREMENTAL_ALGEBRA.md` for the algebra, and `docs/RESULTS.md` / `results/` for full provenance.
-
+The measured Beast ctx512 operation budget is 134.13 ms/token (~7.46 tok/s). Composition of controlled temporal routes yields architecture targets of **163–365 tok/s**. `origami_temporal_census.py` replaces route assumptions with actual Origami layer distributions.
 
 ## Hardware replacement status
 
-The repository now contains direct resident-V100 comparisons, not only CPU-vs-CPU baselines. Current measured classes include:
+The repository contains direct resident-V100 comparisons, not only CPU-vs-CPU baselines. The router is consumer-aware: requiring a dense intermediate and consuming a structured delta are different execution problems.
 
-- nonlinear local residual graph: CPU dirty execution beats V100/cuDNN above the measured size crossover;
-- moments + Gram: CPU delta 73.6× over V100 full;
-- low-rank solve + logdet: CPU delta 22.6× over V100 full;
-- RBF full matrix: hybrid crossover — CPU only for extremely thin edits;
-- RBF -> solve: structured CPU rank-delta path wins 16.57× / 11.51× / 4.54× for 1/4/16 edits at n=4096.
+The next hardware phase diagram is:
 
-The router is consumer-aware: requiring a dense intermediate and consuming a structured delta are different execution problems.
-
-
-## Final run closure
-
-The E168–E209 round established direct resident-V100 crossover maps for local nonlinear graphs, pairwise kernels, spectral demand and normalized-query demand, plus persistent streaming state and GPU->CPU handoff economics.
-
-The post-run David Tom Foss follow-up adds two major execution regimes:
-
-- **cacheless local reconstruction:** exact old/new dirty outputs from bounded input crops, eliminating full intermediate activation caches for compatible consumers;
-- **lazy query reconciliation:** unrequested normalized outputs incur zero maintenance work and reconcile exact edit history only when queried.
-
-The runtime now plans over change structure, requested output, future consumer, state residency, expected horizon and hardware.
+`CPU_delta ↔ GPU_delta ↔ GPU_full`.
