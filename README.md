@@ -10,10 +10,12 @@ The goal is not to make a CPU imitate a GPU kernel-by-kernel. The goal is to rep
 - sparse × low-rank delta algebra and closed crossover rule;
 - factor propagation through linear maps without dense materialization;
 - exact structured RMSNorm and LayerNorm rewrites;
-- local operator composition and dirty-cone tracking;
+- local operator composition, connected-component dirty cones, and geometry-aware tile scheduling;
 - factor-ledger compaction without dense reconstruction;
 - a cost router for full vs sparse vs sparse×low-rank execution;
-- E172–E177 executable experiments;
+- a `DirtyGraphCompiler` that compiles dirty support into optimal local tiles;
+- exact cached global-reduction / projected-reduction delta consumers;
+- E172–E177 plus E186–E187 executable experiments, with E185 CPU-box provenance;
 - regression tests for every exact rewrite;
 - machine-readable result records.
 
@@ -63,6 +65,9 @@ Executable verification in this repository:
 
 - E174 factor propagation across six linear layers: 54.89× in the recorded VM run, with a preceding run at 113.18×;
 - E175 RMSNorm and LayerNorm rewrites agree with full recomputation to ~1e-15;
-- E177 compacts nominal rank 128 to rank 8 without dense materialization.
+- E177 compacts nominal rank 128 to rank 8 without dense materialization;
+- E185 preserves disconnected cones for 50.9×–196.6× vs full recomputation in the supplied CPU-box cases;
+- E186 learns a 167.55-cell merge/split crossover and drives an optimal component partitioner;
+- E187 preserves the dirty-path gain through global consumers: 649.36× cached sum update and 448.87× projected update on the recorded VM run.
 
 See `docs/RESULTS.md` and `results/` for the full records.
