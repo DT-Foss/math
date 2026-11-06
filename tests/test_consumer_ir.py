@@ -47,3 +47,5 @@ def test_quotient_compiler_is_public_runtime_api():
     assert wm.discover_linear_graph_quotients is not None
     assert wm.discover_empirical_quotient is not None
     assert wm.LinearOrderCertificate is not None
+    assert wm.FiniteStateConsumerQuotient is not None
+    assert wm.consumer_program_from_remath_trace is not None
