@@ -67,6 +67,8 @@ from .temporal_census import (
     support_for_energy, effective_rank,
 )
 from .event_response import IntegerResponseLinearState
+from .signed_digit_response import SignedDigitResponseLinearState, balanced_ternary_scales, balanced_ternary_encode
+from .sigma_delta_response import SigmaDeltaResponseLinearState
 from .temporal_delta_machine import (
     LinearDeltaRoute, DeltaPortfolio, LinearRouteCost, LinearDeltaPlanner,
     BeastDecodeBudget, ProjectedDecodeBudget, OrigamiDeltaMachineTarget,
@@ -115,7 +117,7 @@ __all__ = [
     "TemporalOperatorState","BasisOperatorState",
     "TemporalDeltaRecord","TemporalDeltaCensus","measure_temporal_delta",
     "support_for_energy","effective_rank",
-    "IntegerResponseLinearState",
+    "IntegerResponseLinearState","SignedDigitResponseLinearState","balanced_ternary_scales","balanced_ternary_encode","SigmaDeltaResponseLinearState",
     "LinearDeltaRoute","DeltaPortfolio","LinearRouteCost","LinearDeltaPlanner",
     "BeastDecodeBudget","ProjectedDecodeBudget","OrigamiDeltaMachineTarget",
 ]
