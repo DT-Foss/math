@@ -80,6 +80,9 @@ class ObservableLinearQuotient:
     invariance_residual:float
     output_residual:float
     tolerance:float
+    discovery_method:str
+    closure_iterations:int
+    generated_basis_columns:int
 
     @classmethod
     def fit(
@@ -96,13 +99,34 @@ class ObservableLinearQuotient:
         if C.ndim!=2 or C.shape[1]!=n:
             raise ValueError("C shape mismatch")
 
-        blocks=[]
-        CA=C.copy()
-        for _ in range(n):
-            blocks.append(CA)
-            CA=CA@A
-        O=np.concatenate(blocks,axis=0) if blocks else np.empty((0,n))
-        Q=_row_space_basis(O,tol)
+        # Smallest A^T-invariant subspace containing row(C).
+        # This is the observable row space, discovered without materializing
+        # the n-block observability matrix.
+        Q=_row_space_basis(C,tol)
+        generated=int(Q.shape[1])
+        iterations=0
+        for _ in range(max(1,n)):
+            iterations+=1
+            if Q.shape[1]==0:
+                break
+            image=A.T@Q
+            generated+=int(image.shape[1])
+            residual=image-Q@(Q.T@image)
+            if residual.size==0:
+                break
+            U,s,_=np.linalg.svd(residual,full_matrices=False)
+            scale=max(1.0,float(np.linalg.norm(image,ord="fro")))
+            threshold=(
+                float(tol) if tol is not None
+                else 1024*np.finfo(np.float64).eps*max(1,n)*scale
+            )
+            add=int(np.count_nonzero(s>threshold))
+            if add==0:
+                break
+            Q=np.concatenate([Q,U[:,:add]],axis=1)
+            Q,_=np.linalg.qr(Q,mode="reduced")
+            if Q.shape[1]>=n:
+                break
 
         Aq=Q.T@A@Q
         Bq=Q.T@B
@@ -120,7 +144,10 @@ class ObservableLinearQuotient:
             float(tol) if tol is not None
             else 256*np.finfo(np.float64).eps*max(1,n)*scale
         )
-        return cls(A,B,C,Q,Aq,Bq,Cq,inv,out,tolerance)
+        return cls(
+            A,B,C,Q,Aq,Bq,Cq,inv,out,tolerance,
+            "krylov_closure",int(iterations),int(generated),
+        )
 
     @property
     def dimension(self)->int:
