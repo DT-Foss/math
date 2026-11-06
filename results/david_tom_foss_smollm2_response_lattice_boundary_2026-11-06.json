@@ -1,0 +1,60 @@
+{
+  "date": "2026-11-06",
+  "model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+  "layer": 15,
+  "calibration_rows": 512,
+  "test_rows": 69,
+  "qkv": [
+    {
+      "K": 32,
+      "speedup": 0.1983855400544003,
+      "err_med": [
+        0.2310829300034929,
+        0.22189703103272596,
+        0.5312713268844698
+      ]
+    },
+    {
+      "K": 64,
+      "speedup": 0.13643917486022747,
+      "err_med": [
+        0.20548527959435273,
+        0.19278889410364197,
+        0.47432451086931626
+      ]
+    },
+    {
+      "K": 128,
+      "speedup": 0.08618519978046234,
+      "err_med": [
+        0.18523812191885206,
+        0.17364276500876624,
+        0.4267068792087229
+      ]
+    }
+  ],
+  "down": [
+    {
+      "K": 32,
+      "speedup": 0.02486344365528656,
+      "err_med": [
+        0.5666241508282465
+      ]
+    },
+    {
+      "K": 64,
+      "speedup": 0.01433333000403796,
+      "err_med": [
+        0.5160396623044686
+      ]
+    },
+    {
+      "K": 128,
+      "speedup": 0.008212319362088225,
+      "err_med": [
+        0.4792247880512085
+      ]
+    }
+  ],
+  "interpretation": "Static short-block response VQ with K<=128 generalizes too poorly and its Python assignment path is slower than full GEMV. This route is rejected."
+}
