@@ -1,0 +1,23 @@
+name: transfer-tinystories260k
+on:
+  push:
+    branches:
+      - transfer/tinystories260k-local
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch public TinyStories-260K assets from GitHub mirror
+        run: |
+          set -euxo pipefail
+          mkdir -p tiny260k
+          curl -L --fail -o tiny260k/stories260K.bin https://raw.githubusercontent.com/maddiedreese/gbc-transformer/main/stories260K.bin
+          curl -L --fail -o tiny260k/tok512.bin https://raw.githubusercontent.com/maddiedreese/gbc-transformer/main/tok512.bin
+          test "$(stat -c%s tiny260k/stories260K.bin)" -eq 1056540
+          test "$(stat -c%s tiny260k/tok512.bin)" -eq 6227
+          sha256sum tiny260k/* > tiny260k/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tinystories260k-local-assets
+          path: tiny260k/
+          retention-days: 1
