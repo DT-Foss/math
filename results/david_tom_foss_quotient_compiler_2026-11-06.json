@@ -35,5 +35,67 @@
     "max_abs_error": 3.3306690738754696e-14,
     "reconstruction_residual": 7.052632740013702e-14,
     "discovery_and_benchmark_seconds": 0.6452657439999996
+  },
+  "benchmark_history": {
+    "observable_state_speedups": [
+      674.4319987679329,
+      882.1225277699489,
+      621.2859760720665
+    ],
+    "observable_state_speedup_range": [
+      621.2859760720665,
+      882.1225277699489
+    ],
+    "linear_consumer_speedups": [
+      230.7176776586917,
+      241.4070082644628,
+      251.60595770124104
+    ],
+    "linear_consumer_speedup_range": [
+      230.7176776586917,
+      251.60595770124104
+    ],
+    "note": "Independent GitHub Actions runs on shared ubuntu-latest runners; dimensions and proof residuals held constant while wall-clock varied."
+  },
+  "latest": {
+    "observable_state": {
+      "full_dimension": 4096,
+      "discovered_dimension": 8,
+      "state_compression": 512,
+      "steps": 64,
+      "full_ms": 241.733054,
+      "quotient_ms": 0.389085,
+      "speedup": 621.2859760720665,
+      "max_abs_error": 2.6645352591003757e-15,
+      "proof_passed": true,
+      "discovery_method": "krylov_closure"
+    },
+    "linear_consumer": {
+      "input_dimension": 1024,
+      "dense_intermediate_dimension": 4096,
+      "output_dimension": 256,
+      "discovered_dimension": 8,
+      "multiply_reduction": 512,
+      "calls": 128,
+      "full_ms": 32.822752,
+      "quotient_ms": 0.130453,
+      "speedup": 251.60595770124104,
+      "max_abs_error": 3.3306690738754696e-14
+    },
+    "finite_consumer_state": {
+      "physical_states": 65536,
+      "discovered_classes": 16,
+      "state_compression": 4096,
+      "full_table_bytes": 2621440,
+      "reduced_table_bytes": 768,
+      "table_byte_reduction": 3413.3333333333335,
+      "steps": 100000,
+      "full_ms": 40.964126,
+      "quotient_ms": 38.923983,
+      "speedup": 1.0524135209903878,
+      "proof_passed": true,
+      "trajectory_equal": true,
+      "refinement_rounds": 5
+    }
   }
 }
