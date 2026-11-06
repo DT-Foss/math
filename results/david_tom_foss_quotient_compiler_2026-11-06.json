@@ -1,0 +1,39 @@
+{
+  "schema": "consumer-relative-quotient-benchmark/v1",
+  "source": "David Tom Foss automated Quotient Compiler benchmark",
+  "environment": "GitHub Actions ubuntu-latest; BLAS threads pinned to 1",
+  "observable_state": {
+    "full_dimension": 4096,
+    "discovered_dimension": 8,
+    "planted_dimension": 8,
+    "state_compression": 512,
+    "steps": 64,
+    "full_ms": 258.372201,
+    "quotient_ms": 0.383096,
+    "speedup": 674.4319987679329,
+    "max_abs_error": 2.6645352591003757e-15,
+    "invariance_residual": 1.5884694246449523e-15,
+    "output_residual": 1.1279455143075643e-15,
+    "proof_passed": true,
+    "case_build_seconds": 0.08726107000000027,
+    "discovery_and_benchmark_seconds": 1.6416028520000019,
+    "discovery_method": "krylov_closure"
+  },
+  "linear_consumer": {
+    "input_dimension": 1024,
+    "dense_intermediate_dimension": 4096,
+    "output_dimension": 256,
+    "discovered_dimension": 8,
+    "planted_dimension": 8,
+    "full_multiplies_per_call": 5242880,
+    "reduced_multiplies_per_call": 10240,
+    "multiply_reduction": 512,
+    "calls": 128,
+    "full_ms": 33.08653,
+    "quotient_ms": 0.143407,
+    "speedup": 230.7176776586917,
+    "max_abs_error": 3.3306690738754696e-14,
+    "reconstruction_residual": 7.052632740013702e-14,
+    "discovery_and_benchmark_seconds": 0.6452657439999996
+  }
+}
