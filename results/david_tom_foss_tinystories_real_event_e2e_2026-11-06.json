@@ -1,0 +1,38 @@
+{
+  "date": "2026-11-06",
+  "model": "roneneldan/TinyStories-1M",
+  "params": 3745984,
+  "architecture": "GPT-Neo",
+  "tokens": 128,
+  "fp32": {
+    "tok_s": 240.97691879620473
+  },
+  "event_runtime": {
+    "block_size": 2,
+    "patched": "all internal Linear modules except lm_head",
+    "semantics": "response-quantized integer tables with int64 persistent accumulators; temporal path exact to full event semantics",
+    "runs": [
+      {
+        "bits": 2,
+        "full_event_tok_s": 168.05240418922594,
+        "temporal_event_tok_s": 175.23108857159997,
+        "temporal_speedup": 1.04271693949877,
+        "temporal_tokens_equal": true,
+        "fp_prefix": 0,
+        "changed_block_fraction_median": 0.25,
+        "table_MB": 14.155776
+      },
+      {
+        "bits": 3,
+        "full_event_tok_s": 164.66158411963946,
+        "temporal_event_tok_s": 159.41730319376296,
+        "temporal_speedup": 0.9681511570903746,
+        "temporal_tokens_equal": true,
+        "fp_prefix": 0,
+        "changed_block_fraction_median": 0.90625,
+        "table_MB": 77.070336
+      }
+    ]
+  },
+  "interpretation": "First measured end-to-end temporal event executor on a real decoder. The temporal mechanism is exact to its compiled quantized arithmetic and gives +4.27% at 2-bit, but the global 2-bit/3-bit model no longer matches FP32 semantics. Next step is per-operator mixed precision/event routing."
+}
