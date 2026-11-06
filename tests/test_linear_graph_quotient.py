@@ -1,7 +1,7 @@
 import numpy as np
 
 from wirkung_math.consumer_ir import ProgramNode,ConsumerProgram
-from wirkung_math.linear_graph_quotient import discover_linear_graph_quotients
+from wirkung_math.linear_graph_quotient import discover_linear_graph_quotients,compile_linear_graph_quotient
 
 
 def test_backward_quotient_propagation_finds_minimal_chain_states():
@@ -63,3 +63,28 @@ def test_discovered_requirement_reconstructs_all_requested_outputs():
     reconstructed=q["h"].reduced_consumer@z
     expected=np.concatenate([C1@h,C2@h])
     np.testing.assert_allclose(reconstructed,expected,rtol=1e-11,atol=1e-11)
+
+
+def test_compiled_reduced_linear_dag_executes_requested_outputs_exactly():
+    rng=np.random.default_rng(423)
+    A=rng.normal(size=(64,128))
+    # Two branch consumers jointly observe only five hidden directions.
+    Q,_=np.linalg.qr(rng.normal(size=(64,5)))
+    C1=rng.normal(size=(3,5))@Q.T
+    C2=rng.normal(size=(4,5))@Q.T
+    p=ConsumerProgram(
+        (
+            ProgramNode("x","source",metadata={"dimension":128}),
+            ProgramNode("h","linear",("x",),{"matrix":A}),
+            ProgramNode("y1","linear",("h",),{"matrix":C1}),
+            ProgramNode("y2","linear",("h",),{"matrix":C2}),
+        ),
+        frozenset({"x"}),frozenset({"y1","y2"}),
+    )
+    compiled=compile_linear_graph_quotient(p)
+    assert compiled.node_dimensions["h"]==5
+    x=rng.normal(size=128)
+    got=compiled.run({"x":x})
+    np.testing.assert_allclose(got["y1"],C1@A@x,rtol=1e-11,atol=1e-11)
+    np.testing.assert_allclose(got["y2"],C2@A@x,rtol=1e-11,atol=1e-11)
+    assert compiled.reduced_matrices["h"].shape==(5,compiled.node_dimensions["x"])
