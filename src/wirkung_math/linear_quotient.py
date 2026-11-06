@@ -116,7 +116,7 @@ class ObservableLinearQuotient:
             float(np.linalg.norm(lhs,ord="fro")),
             float(np.linalg.norm(C,ord="fro")),
         )
-        tolerance=(
+        tolerance=float(
             float(tol) if tol is not None
             else 256*np.finfo(np.float64).eps*max(1,n)*scale
         )
@@ -132,7 +132,7 @@ class ObservableLinearQuotient:
 
     @property
     def is_exact(self)->bool:
-        return (
+        return bool(
             self.invariance_residual<=self.tolerance
             and self.output_residual<=self.tolerance
         )
