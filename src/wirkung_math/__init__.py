@@ -69,6 +69,17 @@ from .temporal_census import (
 from .event_response import IntegerResponseLinearState
 from .signed_digit_response import SignedDigitResponseLinearState, balanced_ternary_scales, balanced_ternary_encode
 from .sigma_delta_response import SigmaDeltaResponseLinearState
+from .consumer_ir import (
+    EvidenceLevel, ProgramNode, CandidateRoute, CompilationPolicy, ConsumerProgram,
+)
+from .linear_quotient import LinearConsumerQuotient, ObservableLinearQuotient
+from .linear_graph_quotient import LinearNodeQuotient, discover_linear_graph_quotients
+from .quotient_discovery import EmpiricalQuotient, discover_empirical_quotient
+from .certificates import (
+    LinearOrderCertificate, QuantizationCellCertificate, ThresholdCertificate,
+)
+from .quotient_compiler import CompilationResult, QuotientCompiler
+from .result_discovery import ingest_result_receipt
 from .temporal_delta_machine import (
     LinearDeltaRoute, DeltaPortfolio, LinearRouteCost, LinearDeltaPlanner,
     BeastDecodeBudget, ProjectedDecodeBudget, OrigamiDeltaMachineTarget,
@@ -118,6 +129,12 @@ __all__ = [
     "TemporalDeltaRecord","TemporalDeltaCensus","measure_temporal_delta",
     "support_for_energy","effective_rank",
     "IntegerResponseLinearState","SignedDigitResponseLinearState","balanced_ternary_scales","balanced_ternary_encode","SigmaDeltaResponseLinearState",
+    "EvidenceLevel","ProgramNode","CandidateRoute","CompilationPolicy","ConsumerProgram",
+    "LinearConsumerQuotient","ObservableLinearQuotient",
+    "LinearNodeQuotient","discover_linear_graph_quotients",
+    "EmpiricalQuotient","discover_empirical_quotient",
+    "LinearOrderCertificate","QuantizationCellCertificate","ThresholdCertificate",
+    "CompilationResult","QuotientCompiler","ingest_result_receipt",
     "LinearDeltaRoute","DeltaPortfolio","LinearRouteCost","LinearDeltaPlanner",
     "BeastDecodeBudget","ProjectedDecodeBudget","OrigamiDeltaMachineTarget",
 ]
