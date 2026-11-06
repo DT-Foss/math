@@ -38,3 +38,12 @@ def test_exact_policy_allows_only_proven_routes():
     assert exact.filter((proven,validated,heuristic))==(proven,)
     relaxed=CompilationPolicy(exact_only=False,allow_validated=True)
     assert relaxed.filter((proven,validated,heuristic))==(proven,validated)
+
+
+def test_quotient_compiler_is_public_runtime_api():
+    import wirkung_math as wm
+    assert wm.QuotientCompiler is not None
+    assert wm.ObservableLinearQuotient is not None
+    assert wm.discover_linear_graph_quotients is not None
+    assert wm.discover_empirical_quotient is not None
+    assert wm.LinearOrderCertificate is not None
