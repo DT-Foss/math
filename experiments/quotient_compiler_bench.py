@@ -12,21 +12,21 @@ from wirkung_math.quotient_benchmark import (
 def main():
     start=time.perf_counter()
     observable=make_observable_case(
-        state_dim=512,observable_dim=8,input_dim=4,
-        steps=256,seed=20261106,
+        state_dim=4096,observable_dim=8,input_dim=4,
+        steps=64,seed=20261106,
     )
     observable_build=time.perf_counter()-start
     start=time.perf_counter()
-    obs=benchmark_observable_case(observable,repeats=5)
+    obs=benchmark_observable_case(observable,repeats=3)
     obs["case_build_seconds"]=observable_build
     obs["discovery_and_benchmark_seconds"]=time.perf_counter()-start
 
     chain=make_linear_chain_case(
-        input_dim=512,intermediate_dim=2048,output_dim=128,
-        quotient_dim=8,calls=256,seed=20261107,
+        input_dim=1024,intermediate_dim=4096,output_dim=256,
+        quotient_dim=8,calls=128,seed=20261107,
     )
     start=time.perf_counter()
-    linear=benchmark_linear_chain_case(chain,repeats=7)
+    linear=benchmark_linear_chain_case(chain,repeats=5)
     linear["discovery_and_benchmark_seconds"]=time.perf_counter()-start
 
     result={
