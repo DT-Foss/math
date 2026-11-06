@@ -4,6 +4,7 @@ on:
     branches: [research/david-quotient-compiler]
     paths:
       - src/wirkung_math/quotient_benchmark.py
+      - src/wirkung_math/linear_quotient.py
       - experiments/quotient_compiler_bench.py
       - .github/workflows/quotient-discovery-benchmark.yml
   workflow_dispatch:
