@@ -1,0 +1,46 @@
+{
+  "date": "2026-11-06",
+  "model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+  "bits": 3,
+  "new_tokens": 16,
+  "full_quant_tok_s": 24.235858968553707,
+  "runs": [
+    {
+      "threshold": 0.6,
+      "tok_s": 16.88356301208469,
+      "speedup": 0.696635635402537,
+      "argmax_match": 12,
+      "max_logit_diff": 19.444671630859375,
+      "delta_calls": 775,
+      "full_calls": 2601
+    },
+    {
+      "threshold": 0.75,
+      "tok_s": 11.294471307516881,
+      "speedup": 0.4660231486811167,
+      "argmax_match": 11,
+      "max_logit_diff": 20.319438934326172,
+      "delta_calls": 2470,
+      "full_calls": 906
+    },
+    {
+      "threshold": 0.9,
+      "tok_s": 10.884611603128846,
+      "speedup": 0.4491118560003071,
+      "argmax_match": 12,
+      "max_logit_diff": 26.478763580322266,
+      "delta_calls": 3165,
+      "full_calls": 211
+    },
+    {
+      "threshold": 1,
+      "tok_s": 10.551630671722329,
+      "speedup": 0.43537267176761446,
+      "argmax_match": 12,
+      "max_logit_diff": 26.478763580322266,
+      "delta_calls": 3165,
+      "full_calls": 211
+    }
+  ],
+  "interpretation": "Aggressive float32 temporal recurrence is not suitable as an exact execution semantics: repeated non-associative accumulation drifts through 30 layers. Origami must use deterministic quantized/integer accumulator semantics or certified rebasing for exact temporal execution."
+}

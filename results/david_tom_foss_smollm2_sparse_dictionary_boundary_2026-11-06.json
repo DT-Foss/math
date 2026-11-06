@@ -1,0 +1,20 @@
+{
+  "date": "2026-11-06",
+  "model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+  "calibration": "512-token independent calibration text",
+  "test": "100 held-out autoregressive temporal deltas",
+  "method": "MiniBatchDictionaryLearning on temporal deltas; OMP sparse codes; exact downstream weight image used to measure response error",
+  "q": {
+    "components": 128,
+    "atoms": 16,
+    "residual_norm_median": 0.7896,
+    "output_delta_error_median": 0.8704
+  },
+  "down": {
+    "components": 128,
+    "atoms": 16,
+    "residual_norm_median": 0.9505,
+    "output_delta_error_median": 0.9451
+  },
+  "interpretation": "A simple global union-of-atoms/OMP temporal dictionary does not generalize to held-out SmolLM2 deltas at useful response error. The fixed sparse-dictionary route is rejected."
+}

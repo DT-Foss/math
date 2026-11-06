@@ -1,0 +1,12 @@
+{
+  "date": "2026-11-06",
+  "model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+  "tokens": 128,
+  "baseline_tok_s": 23.378296970472576,
+  "compiled_tok_s": 23.167570280033093,
+  "speedup": 0.9909862257842974,
+  "tokens_equal": true,
+  "compile_seconds": 0.3058232730000441,
+  "table_bytes": 188743680,
+  "interpretation": "Exact token-conditioned layer0 RMSNorm->Q/K/V compilation preserves all tokens but table footprint exceeds the replaced weight traffic on this small model, so lookup is not profitable."
+}

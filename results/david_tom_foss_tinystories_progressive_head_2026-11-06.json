@@ -1,0 +1,112 @@
+{
+  "date": "2026-11-06",
+  "model": "roneneldan/TinyStories-1M",
+  "vocab": 50257,
+  "hidden": 64,
+  "baseline_tok_s": {
+    "Once upon a time": 310.9446,
+    "A small dog went to the park": 311.49,
+    "One day the sun was shining": 312.0802
+  },
+  "cases": [
+    {
+      "stages": [
+        4,
+        8,
+        16,
+        32,
+        48
+      ],
+      "prompt": "One day the sun was shining",
+      "tokens_equal": true,
+      "tok_s": 106.8421,
+      "speedup": 0.34235,
+      "candidate_medians": [
+        50257,
+        50257,
+        25712,
+        1250,
+        8
+      ]
+    },
+    {
+      "stages": [
+        8,
+        16,
+        32,
+        48
+      ],
+      "prompt": "One day the sun was shining",
+      "tokens_equal": true,
+      "tok_s": 125.6877,
+      "speedup": 0.40274,
+      "candidate_medians": [
+        50257,
+        25712,
+        1250,
+        8
+      ]
+    },
+    {
+      "stages": [
+        4,
+        12,
+        24,
+        40,
+        56
+      ],
+      "prompt": "Once upon a time",
+      "tokens_equal": true,
+      "tok_s": 99.7527,
+      "speedup": 0.32081,
+      "candidate_medians": [
+        50257,
+        50257,
+        26804,
+        85,
+        2
+      ]
+    },
+    {
+      "stages": [
+        4,
+        12,
+        24,
+        40,
+        56
+      ],
+      "prompt": "A small dog went to the park",
+      "tokens_equal": true,
+      "tok_s": 96.2631,
+      "speedup": 0.30904,
+      "candidate_medians": [
+        50257,
+        50257,
+        50256,
+        173,
+        2
+      ]
+    },
+    {
+      "stages": [
+        4,
+        12,
+        24,
+        40,
+        56
+      ],
+      "prompt": "One day the sun was shining",
+      "tokens_equal": true,
+      "tok_s": 107.5288,
+      "speedup": 0.34456,
+      "candidate_medians": [
+        50257,
+        50242,
+        15043,
+        163,
+        2
+      ]
+    }
+  ],
+  "interpretation": "Progressive exact subspace bounds collapse the final exact candidate set to median 2-13 tokens while preserving every tested token. Python/Torch staging remains slower; a single native fused bound/compaction kernel is required."
+}

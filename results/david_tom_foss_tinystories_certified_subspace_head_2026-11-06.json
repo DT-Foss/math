@@ -1,0 +1,63 @@
+{
+  "date": "2026-11-06",
+  "model": "roneneldan/TinyStories-1M",
+  "vocab": 50257,
+  "hidden": 64,
+  "calibration_states": 256,
+  "baseline_tok_s": {
+    "Once upon a time": 343.26043,
+    "A small dog went to the park": 353.50328,
+    "One day the sun was shining": 350.32688
+  },
+  "key_results": [
+    {
+      "rank": 24,
+      "prompt": "One day the sun was shining",
+      "tokens_equal": true,
+      "candidate_median": 6085,
+      "candidate_p90": 20272.4,
+      "speedup": 0.59543
+    },
+    {
+      "rank": 32,
+      "prompt": "Once upon a time",
+      "tokens_equal": true,
+      "candidate_median": 959,
+      "candidate_p90": 47775.2,
+      "speedup": 0.62288
+    },
+    {
+      "rank": 32,
+      "prompt": "One day the sun was shining",
+      "tokens_equal": true,
+      "candidate_median": 1164,
+      "candidate_p90": 2227.6,
+      "speedup": 0.63008
+    },
+    {
+      "rank": 48,
+      "prompt": "Once upon a time",
+      "tokens_equal": true,
+      "candidate_median": 32,
+      "candidate_p90": 166.8,
+      "speedup": 0.5631
+    },
+    {
+      "rank": 48,
+      "prompt": "A small dog went to the park",
+      "tokens_equal": true,
+      "candidate_median": 32,
+      "candidate_p90": 154.8,
+      "speedup": 0.54497
+    },
+    {
+      "rank": 48,
+      "prompt": "One day the sun was shining",
+      "tokens_equal": true,
+      "candidate_median": 32,
+      "candidate_p90": 33.4,
+      "speedup": 0.5558
+    }
+  ],
+  "interpretation": "Query-subspace Cauchy certificates exactly prune 50,257 vocabulary rows to tens of exact candidates on many tokens, but a one-shot Python/Torch rank-48 bound is slower than the small full 64D head. Progressive/native evaluation targets the software overhead."
+}

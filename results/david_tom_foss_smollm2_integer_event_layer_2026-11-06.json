@@ -1,0 +1,43 @@
+{
+  "date": "2026-11-06",
+  "model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+  "layer": "model.layers.15.mlp.down_proj",
+  "shape": [
+    576,
+    1536
+  ],
+  "tokens": 64,
+  "rows": [
+    {
+      "bits": 3,
+      "changed_fraction_median": 0.5462239583333334,
+      "full_seq_ms": 5.06375,
+      "delta_seq_ms": 3.958027,
+      "speedup": 1.279362167059497,
+      "int_accumulator_exact": true,
+      "output_relerr_median": 0.2949480776031317,
+      "p90": 0.34326527727505024
+    },
+    {
+      "bits": 4,
+      "changed_fraction_median": 0.76171875,
+      "full_seq_ms": 3.9815625,
+      "delta_seq_ms": 4.412439,
+      "speedup": 0.9023495848894455,
+      "int_accumulator_exact": true,
+      "output_relerr_median": 0.1421219785352792,
+      "p90": 0.1685990529641457
+    },
+    {
+      "bits": 5,
+      "changed_fraction_median": 0.880859375,
+      "full_seq_ms": 5.149812,
+      "delta_seq_ms": 4.854215,
+      "speedup": 1.0608949129776906,
+      "int_accumulator_exact": true,
+      "output_relerr_median": 0.06868932792471552,
+      "p90": 0.0800468923088201
+    }
+  ],
+  "interpretation": "Deterministic temporal integer accumulation removes float recurrence drift; simple scalar activation coding remains a quality/sparsity tradeoff."
+}

@@ -1,0 +1,114 @@
+{
+  "date": "2026-11-06",
+  "model": "roneneldan/TinyStories-1M",
+  "vocab": 50257,
+  "hidden": 64,
+  "baseline_tok_s": {
+    "Once upon a time": 273.0519,
+    "A small dog went to the park": 275.4169,
+    "One day the sun was shining": 276.1904
+  },
+  "cases": [
+    {
+      "stages": [
+        4,
+        12,
+        24,
+        40,
+        56
+      ],
+      "results": [
+        {
+          "prompt": "Once upon a time",
+          "tokens_equal": true,
+          "tok_s": 137.5492,
+          "speedup": 0.50375,
+          "candidate_median": [
+            50257,
+            50257,
+            26804,
+            99,
+            2
+          ]
+        },
+        {
+          "prompt": "A small dog went to the park",
+          "tokens_equal": true,
+          "tok_s": 136.6152,
+          "speedup": 0.49603,
+          "candidate_median": [
+            50257,
+            50257,
+            50256,
+            174,
+            2
+          ]
+        },
+        {
+          "prompt": "One day the sun was shining",
+          "tokens_equal": true,
+          "tok_s": 147.9459,
+          "speedup": 0.53567,
+          "candidate_median": [
+            50257,
+            50242,
+            15043,
+            163,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "stages": [
+        8,
+        16,
+        32,
+        48,
+        56
+      ],
+      "results": [
+        {
+          "prompt": "Once upon a time",
+          "tokens_equal": true,
+          "tok_s": 128.7456,
+          "speedup": 0.47151,
+          "candidate_median": [
+            50257,
+            50257,
+            2417,
+            13,
+            2
+          ]
+        },
+        {
+          "prompt": "A small dog went to the park",
+          "tokens_equal": true,
+          "tok_s": 122.5588,
+          "speedup": 0.44499,
+          "candidate_median": [
+            50257,
+            50257,
+            11744,
+            14,
+            2
+          ]
+        },
+        {
+          "prompt": "One day the sun was shining",
+          "tokens_equal": true,
+          "tok_s": 137.0427,
+          "speedup": 0.49619,
+          "candidate_median": [
+            50257,
+            25712,
+            1250,
+            8,
+            2
+          ]
+        }
+      ]
+    }
+  ],
+  "interpretation": "A fused native branch-and-bound implementation preserves every tested token and collapses the final vocabulary candidate set to median 2, but early wide stages plus scalar bound work remain slower than the highly optimized 64D SGEMV on this tiny model. The algorithm is computationally selective but not profitable at hidden=64."
+}

@@ -1,0 +1,33 @@
+name: real-model-native-head
+on:
+  push:
+    branches: [research/david-smollm-real-e2e]
+    paths:
+      - experiments/tinystories_native_certified_head.py
+      - .github/workflows/real-model-native-head.yml
+  workflow_dispatch:
+jobs:
+  native-head:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env: {OMP_NUM_THREADS: "2", MKL_NUM_THREADS: "2", THREADS: "2"}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y gcc
+          python -m pip install --upgrade pip
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install "transformers==4.46.3" safetensors tokenizers
+      - name: Run native exact progressive head
+        run: |
+          python experiments/tinystories_native_certified_head.py | tee /tmp/native_head.log
+          grep '^RESULT ' /tmp/native_head.log | sed 's/^RESULT //' > /tmp/native_head.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tinystories-native-head
+          path: |
+            /tmp/native_head.json
+            /tmp/native_head.log

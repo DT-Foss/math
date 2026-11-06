@@ -1,0 +1,40 @@
+{
+  "model": "roneneldan/TinyStories-1M",
+  "date": "2026-11-06",
+  "tokens": 128,
+  "scheme": "absolute balanced-ternary signed-digit response planes, block size 2, all internal Linears except lm_head",
+  "fp_tok_s": 241.17534154542744,
+  "runs": [
+    {
+      "stages": 4,
+      "effective_bits": 6.339850002884624,
+      "full_tok_s": 146.86289077351216,
+      "temporal_tok_s": 141.72303527789555,
+      "temporal_speedup": 0.9650023537699312,
+      "fp_prefix": 14,
+      "event_fraction": 0.828125,
+      "table_MB": 56.623104
+    },
+    {
+      "stages": 5,
+      "effective_bits": 7.924812503605781,
+      "full_tok_s": 140.4402042657512,
+      "temporal_tok_s": 133.3652912001631,
+      "temporal_speedup": 0.9496233069256975,
+      "fp_prefix": 16,
+      "event_fraction": 0.840625,
+      "table_MB": 70.77888
+    },
+    {
+      "stages": 6,
+      "effective_bits": 9.509775004326936,
+      "full_tok_s": 134.51467614234738,
+      "temporal_tok_s": 128.1327312447929,
+      "temporal_speedup": 0.9525557724957763,
+      "fp_prefix": 30,
+      "event_fraction": 0.8489583333333334,
+      "table_MB": 84.934656
+    }
+  ],
+  "interpretation": "Absolute signed-digit planes remain event-dense and do not recover FP32 parity. Temporal innovation must be error-feedback/sigma-delta coded instead of repeatedly coding absolute state."
+}

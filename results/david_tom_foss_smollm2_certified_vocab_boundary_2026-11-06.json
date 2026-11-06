@@ -1,0 +1,35 @@
+{
+  "date": "2026-11-06",
+  "model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+  "tokens": 64,
+  "vocab": 49152,
+  "baseline_tok_s": 23.156958924807018,
+  "runs": [
+    {
+      "block": 16,
+      "tok_s": 22.48031801609547,
+      "candidates_median": 49152,
+      "full_rebases": 64
+    },
+    {
+      "block": 32,
+      "tok_s": 22.878517658055426,
+      "candidates_median": 49152,
+      "full_rebases": 64
+    },
+    {
+      "block": 64,
+      "tok_s": 23.084981447052417,
+      "candidates_median": 49152,
+      "full_rebases": 64
+    },
+    {
+      "block": 128,
+      "tok_s": 23.114223292299027,
+      "candidates_median": 49152,
+      "full_rebases": 64
+    }
+  ],
+  "tokens_equal": true,
+  "interpretation": "Blockwise Cauchy bounds are exact but too loose: all vocabulary candidates survive every step. Simple certified-vocab pruning is rejected."
+}

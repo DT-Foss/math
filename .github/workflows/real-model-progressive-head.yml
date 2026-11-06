@@ -1,0 +1,31 @@
+name: real-model-progressive-head
+on:
+  push:
+    branches: [research/david-smollm-real-e2e]
+    paths:
+      - experiments/tinystories_progressive_head.py
+      - .github/workflows/real-model-progressive-head.yml
+  workflow_dispatch:
+jobs:
+  progressive-head:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env: {OMP_NUM_THREADS: "2", MKL_NUM_THREADS: "2", THREADS: "2"}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: |
+          python -m pip install --upgrade pip
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install "transformers==4.46.3" safetensors tokenizers
+      - name: Run progressive exact vocabulary head
+        run: |
+          python experiments/tinystories_progressive_head.py | tee /tmp/progressive_head.log
+          grep '^RESULT ' /tmp/progressive_head.log | sed 's/^RESULT //' > /tmp/progressive_head.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tinystories-progressive-head
+          path: |
+            /tmp/progressive_head.json
+            /tmp/progressive_head.log
