@@ -1,0 +1,121 @@
+{
+  "source": "David Tom Foss automatic real-receipt quotient discovery, GitHub Actions run 42203272987",
+  "files_scanned": 4,
+  "measured_wins": [
+    {
+      "cost_win": true,
+      "evidence": "VALIDATED",
+      "file": "results/david_tom_foss_smollm2_integer_event_layer_2026-11-06.json",
+      "receipt_path": "rows[0]",
+      "route": "receipt:rows[0]",
+      "semantic_success": true,
+      "speedup": 1.279362167059497,
+      "state_bytes": 0
+    },
+    {
+      "cost_win": true,
+      "evidence": "VALIDATED",
+      "file": "results/david_tom_foss_smollm2_integer_event_layer_2026-11-06.json",
+      "receipt_path": "rows[2]",
+      "route": "receipt:rows[2]",
+      "semantic_success": true,
+      "speedup": 1.0608949129776906,
+      "state_bytes": 0
+    },
+    {
+      "cost_win": true,
+      "evidence": "VALIDATED",
+      "file": "results/david_tom_foss_tinystories_real_event_e2e_2026-11-06.json",
+      "receipt_path": "event_runtime/runs[0]",
+      "route": "receipt:event_runtime/runs[0]",
+      "semantic_success": true,
+      "speedup": 1.04271693949877,
+      "state_bytes": 0
+    }
+  ],
+  "parse_errors": [],
+  "schema": "compute-quotient-discovery/v1",
+  "semantic_failures": [],
+  "semantic_wins_hardware_losses": [
+    {
+      "cost_win": false,
+      "evidence": "VALIDATED",
+      "file": "results/david_tom_foss_tinystories_real_event_e2e_2026-11-06.json",
+      "receipt_path": "event_runtime/runs[1]",
+      "route": "receipt:event_runtime/runs[1]",
+      "semantic_success": true,
+      "speedup": 0.9681511570903746,
+      "state_bytes": 0
+    },
+    {
+      "cost_win": false,
+      "evidence": "VALIDATED",
+      "file": "results/david_tom_foss_smollm2_integer_event_layer_2026-11-06.json",
+      "receipt_path": "rows[1]",
+      "route": "receipt:rows[1]",
+      "semantic_success": true,
+      "speedup": 0.9023495848894455,
+      "state_bytes": 0
+    },
+    {
+      "cost_win": false,
+      "evidence": "VALIDATED",
+      "file": "results/david_tom_foss_tinystories_certified_subspace_head_2026-11-06.json",
+      "receipt_path": "key_results[2]",
+      "route": "receipt:key_results[2]",
+      "semantic_success": true,
+      "speedup": 0.63008,
+      "state_bytes": 0
+    },
+    {
+      "cost_win": false,
+      "evidence": "VALIDATED",
+      "file": "results/david_tom_foss_tinystories_certified_subspace_head_2026-11-06.json",
+      "receipt_path": "key_results[1]",
+      "route": "receipt:key_results[1]",
+      "semantic_success": true,
+      "speedup": 0.62288,
+      "state_bytes": 0
+    },
+    {
+      "cost_win": false,
+      "evidence": "VALIDATED",
+      "file": "results/david_tom_foss_tinystories_certified_subspace_head_2026-11-06.json",
+      "receipt_path": "key_results[0]",
+      "route": "receipt:key_results[0]",
+      "semantic_success": true,
+      "speedup": 0.59543,
+      "state_bytes": 0
+    },
+    {
+      "cost_win": false,
+      "evidence": "VALIDATED",
+      "file": "results/david_tom_foss_tinystories_certified_subspace_head_2026-11-06.json",
+      "receipt_path": "key_results[3]",
+      "route": "receipt:key_results[3]",
+      "semantic_success": true,
+      "speedup": 0.5631,
+      "state_bytes": 0
+    },
+    {
+      "cost_win": false,
+      "evidence": "VALIDATED",
+      "file": "results/david_tom_foss_tinystories_certified_subspace_head_2026-11-06.json",
+      "receipt_path": "key_results[5]",
+      "route": "receipt:key_results[5]",
+      "semantic_success": true,
+      "speedup": 0.5558,
+      "state_bytes": 0
+    },
+    {
+      "cost_win": false,
+      "evidence": "VALIDATED",
+      "file": "results/david_tom_foss_tinystories_certified_subspace_head_2026-11-06.json",
+      "receipt_path": "key_results[4]",
+      "route": "receipt:key_results[4]",
+      "semantic_success": true,
+      "speedup": 0.54497,
+      "state_bytes": 0
+    }
+  ]
+}
