@@ -20,7 +20,7 @@ from .graph import laplacian_edge_delta, laplacian_edges_delta
 from .reduction import SegmentReductionTree
 from .coalesce import RowReplacementLog
 from .woodbury import GeneralLowRankUpdate, GeneralWoodburyCache, SolverWoodburyCache
-from .remath_bridge import RemathWirkungHint, classify_remath_formula, temporalize_hint, annotate_remath_trace
+from .remath_bridge import RemathWirkungHint, classify_remath_formula, temporalize_hint, annotate_remath_trace, consumer_program_from_remath_trace
 from .dirty2d import AreaCostModel, DirtyGraphCompiler2D, DirtyPlan2D, Rect, schedule_rectangles_optimal
 from .update_ledger import LowRankUpdateLedger, IncrementalWoodburyLedger
 from .cacheless_local import LocalGraphDependency, LocalResidencyChoice, LocalResidencyPlanner
@@ -79,6 +79,7 @@ from .certificates import (
     LinearOrderCertificate, QuantizationCellCertificate, ThresholdCertificate,
 )
 from .quotient_compiler import CompilationResult, QuotientCompiler
+from .finite_quotient import FiniteStateConsumerQuotient
 from .result_discovery import ingest_result_receipt
 from .temporal_delta_machine import (
     LinearDeltaRoute, DeltaPortfolio, LinearRouteCost, LinearDeltaPlanner,
@@ -102,7 +103,7 @@ __all__ = [
     "laplacian_edge_delta","laplacian_edges_delta",
     "SegmentReductionTree","RowReplacementLog",
     "GeneralLowRankUpdate","GeneralWoodburyCache","SolverWoodburyCache",
-    "RemathWirkungHint","classify_remath_formula","temporalize_hint","annotate_remath_trace",
+    "RemathWirkungHint","classify_remath_formula","temporalize_hint","annotate_remath_trace","consumer_program_from_remath_trace",
     "AreaCostModel","DirtyGraphCompiler2D","DirtyPlan2D","Rect","schedule_rectangles_optimal",
     "LowRankUpdateLedger","IncrementalWoodburyLedger",
     "LocalGraphDependency","LocalResidencyChoice","LocalResidencyPlanner",
@@ -134,7 +135,7 @@ __all__ = [
     "LinearNodeQuotient","discover_linear_graph_quotients",
     "EmpiricalQuotient","discover_empirical_quotient",
     "LinearOrderCertificate","QuantizationCellCertificate","ThresholdCertificate",
-    "CompilationResult","QuotientCompiler","ingest_result_receipt",
+    "CompilationResult","QuotientCompiler","FiniteStateConsumerQuotient","ingest_result_receipt",
     "LinearDeltaRoute","DeltaPortfolio","LinearRouteCost","LinearDeltaPlanner",
     "BeastDecodeBudget","ProjectedDecodeBudget","OrigamiDeltaMachineTarget",
 ]
