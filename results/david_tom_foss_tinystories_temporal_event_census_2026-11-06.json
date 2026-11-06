@@ -1,0 +1,23 @@
+{
+  "date": "2026-11-06",
+  "model": "roneneldan/TinyStories-1M",
+  "params": 3745984,
+  "architecture": "GPT-Neo",
+  "hidden": 64,
+  "layers": 8,
+  "tokens": 128,
+  "baseline": {
+    "median_ms_per_token": 3.968,
+    "tok_s": 252
+  },
+  "selected_transition_hits": {
+    "h0.q.block2.bit2": 0.90399,
+    "h1.q.block2.bit2": 0.9198,
+    "h1.attention_out.block4.bit2": 0.9114,
+    "h3.attention_out.block4.bit2": 0.8821,
+    "h7.attention_out.block4.bit2": 0.9069,
+    "h0.mlp_c_proj.block4.bit2": 0.855,
+    "h7.mlp_c_proj.block4.bit2": 0.8446
+  },
+  "interpretation": "Real TinyStories token transitions contain high repeated low-bit block-event structure. The effect is strongest at selected operators and is therefore a route/compiler signal, not a global-model property."
+}
