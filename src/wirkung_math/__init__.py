@@ -50,6 +50,10 @@ from .temporal_multilinear import TemporalRMSNormMultiLinearState
 from .temporal_quantized import QuantizedVectorState, QuantizedTemporalLinearState
 from .temporal_activation import QuantizedSwiGLUDownState, silu, nearest_codes
 from .temporal_basis import TemporalDeltaBasis, EncodedTemporalDelta, exact_batch_factorization
+from .temporal_quantizer import (
+    TransitionRegularizedQuantizer, TemporalQuantizationResult,
+    transition_count, transition_distortion_frontier,
+)
 from .delta_layout import (
     ColumnPackedLinearOperator, ColumnPackedTemporalLinearState,
     ColumnPackedRMSNormLinearState, ColumnPackedRMSNormMultiLinearState,
@@ -106,6 +110,8 @@ __all__ = [
     "TemporalRMSNormMultiLinearState","QuantizedVectorState","QuantizedTemporalLinearState",
     "QuantizedSwiGLUDownState","silu","nearest_codes",
     "TemporalDeltaBasis","EncodedTemporalDelta","exact_batch_factorization",
+    "TransitionRegularizedQuantizer","TemporalQuantizationResult",
+    "transition_count","transition_distortion_frontier",
     "ColumnPackedLinearOperator","ColumnPackedTemporalLinearState",
     "ColumnPackedRMSNormLinearState","ColumnPackedRMSNormMultiLinearState",
     "CertifiedTopKRouterState","CompiledPartitionAttention","PartitionAttentionBank",
