@@ -95,7 +95,9 @@ class TransitionRegularizedQuantizer:
 
             for step in range(1, time_steps):
                 # transition[previous_code, current_code]
-                transition = dp[:, None] + p
+                transition = np.broadcast_to(
+                    dp[:, None] + p, (code_count, code_count)
+                ).copy()
                 transition[np.arange(code_count), np.arange(code_count)] = dp
                 predecessor = np.argmin(transition, axis=0)
                 dp = emission[step] + transition[predecessor, np.arange(code_count)]
@@ -109,7 +111,12 @@ class TransitionRegularizedQuantizer:
                 codes[step - 1, coordinate] = code
 
         decoded = np.take_along_axis(
-            level_matrix[None, :, :], codes[:, :, None], axis=2
+            np.broadcast_to(
+                level_matrix[None, :, :],
+                (time_steps, width, code_count),
+            ),
+            codes[:, :, None],
+            axis=2,
         )[:, :, 0]
         squared_error = float(np.square(x - decoded).sum())
         transitions = transition_count(codes)
