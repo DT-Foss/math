@@ -1,5 +1,5 @@
 from __future__ import annotations
-from collections import OrderedDict
+from collections import Counter, OrderedDict
 from dataclasses import dataclass
 import numpy as np
 
@@ -87,7 +87,9 @@ class AtomicTransitionResponseCache:
             self._cache.popitem(last=False)
         return response
 
-    def apply(self, old_codes: np.ndarray, new_codes: np.ndarray) -> tuple[np.ndarray, AtomicUpdateStats]:
+    def apply(
+        self, old_codes: np.ndarray, new_codes: np.ndarray
+    ) -> tuple[np.ndarray, AtomicUpdateStats]:
         old = np.asarray(old_codes)
         new = np.asarray(new_codes)
         if old.shape != (self.operator.input_width,) or new.shape != old.shape:
@@ -95,7 +97,10 @@ class AtomicTransitionResponseCache:
         changed = np.flatnonzero(old != new)
         hit_before = self.hits
         miss_before = self.misses
-        total = np.zeros(self.operator.output_width, dtype=np.result_type(self.levels, float))
+        total = np.zeros(
+            self.operator.output_width,
+            dtype=np.result_type(self.levels, float),
+        )
         for direction in changed:
             total += self.response(
                 int(direction), int(old[direction]), int(new[direction])
@@ -105,6 +110,108 @@ class AtomicTransitionResponseCache:
             hits=self.hits - hit_before,
             misses=self.misses - miss_before,
             cache_size=self.size,
+        )
+
+
+@dataclass(frozen=True)
+class TransitionProgramStats:
+    events: int
+    macro_hit: bool
+    macro_size: int
+    atomic_hits: int
+    atomic_misses: int
+
+
+class TransitionProgramCache:
+    """
+    Two-level instruction cache for a quantized neural state transition.
+
+    L1 stores frequently repeated complete event programs. L2 is the atomic
+    `(direction, old_code, new_code)` response cache. Unique programs still
+    benefit from atomic reuse; recurrent programs collapse to one response read.
+    """
+
+    def __init__(
+        self,
+        atomic_cache: AtomicTransitionResponseCache,
+        *,
+        promote_after: int = 2,
+        capacity: int | None = None,
+    ) -> None:
+        if promote_after < 1:
+            raise ValueError("promote_after must be positive")
+        if capacity is not None and capacity < 1:
+            raise ValueError("capacity must be positive")
+        self.atomic_cache = atomic_cache
+        self.promote_after = int(promote_after)
+        self.capacity = capacity
+        self._frequency: Counter[tuple[tuple[int, int, int], ...]] = Counter()
+        self._macros: OrderedDict[
+            tuple[tuple[int, int, int], ...], np.ndarray
+        ] = OrderedDict()
+        self.macro_hits = 0
+        self.macro_misses = 0
+
+    @property
+    def macro_size(self) -> int:
+        return len(self._macros)
+
+    @staticmethod
+    def _program(
+        old_codes: np.ndarray,
+        new_codes: np.ndarray,
+    ) -> tuple[tuple[int, int, int], ...]:
+        old = np.asarray(old_codes)
+        new = np.asarray(new_codes)
+        if old.shape != new.shape or old.ndim != 1:
+            raise ValueError("codes must be equal-length vectors")
+        changed = np.flatnonzero(old != new)
+        return tuple(
+            (int(direction), int(old[direction]), int(new[direction]))
+            for direction in changed
+        )
+
+    def response(
+        self,
+        old_codes: np.ndarray,
+        new_codes: np.ndarray,
+    ) -> tuple[np.ndarray, TransitionProgramStats]:
+        program = self._program(old_codes, new_codes)
+        macro = self._macros.get(program)
+        if macro is not None:
+            self._macros.move_to_end(program)
+            self.macro_hits += 1
+            return macro, TransitionProgramStats(
+                events=len(program),
+                macro_hit=True,
+                macro_size=self.macro_size,
+                atomic_hits=0,
+                atomic_misses=0,
+            )
+
+        self.macro_misses += 1
+        hit_before = self.atomic_cache.hits
+        miss_before = self.atomic_cache.misses
+        total = np.zeros(
+            self.atomic_cache.operator.output_width,
+            dtype=np.result_type(self.atomic_cache.levels, float),
+        )
+        for direction, old_code, new_code in program:
+            total += self.atomic_cache.response(direction, old_code, new_code)
+
+        self._frequency[program] += 1
+        if self._frequency[program] >= self.promote_after:
+            self._macros[program] = total.copy()
+            self._macros.move_to_end(program)
+            if self.capacity is not None and len(self._macros) > self.capacity:
+                self._macros.popitem(last=False)
+
+        return total, TransitionProgramStats(
+            events=len(program),
+            macro_hit=False,
+            macro_size=self.macro_size,
+            atomic_hits=self.atomic_cache.hits - hit_before,
+            atomic_misses=self.atomic_cache.misses - miss_before,
         )
 
 
@@ -146,7 +253,9 @@ class TemporalEventLinearState:
             response_cache=cache,
         )
 
-    def update_codes(self, new_codes: np.ndarray) -> tuple[np.ndarray, AtomicUpdateStats]:
+    def update_codes(
+        self, new_codes: np.ndarray
+    ) -> tuple[np.ndarray, AtomicUpdateStats]:
         incoming = np.asarray(new_codes)
         delta, stats = self.response_cache.apply(self.codes, incoming)
         self.output = self.output + delta
