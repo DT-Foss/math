@@ -1,0 +1,41 @@
+{
+  "model": "roneneldan/TinyStories-1M",
+  "date": "2026-11-06",
+  "threads": 2,
+  "compile_selected": 26,
+  "validated_selected": {
+    "transformer.h.0.attn.attention.q_proj": 4,
+    "transformer.h.0.attn.attention.k_proj": 4,
+    "transformer.h.0.attn.attention.v_proj": 3,
+    "transformer.h.0.attn.attention.out_proj": 6,
+    "transformer.h.1.attn.attention.k_proj": 5,
+    "transformer.h.1.attn.attention.v_proj": 6
+  },
+  "validation": {
+    "prompt": "A little dog was playing outside",
+    "tokens": 64,
+    "fp32_tok_s": 288.95686759838514,
+    "fp_equal": true,
+    "temporal_equal_full_sigma": true,
+    "full_sigma_tok_s": 283.6836759926045,
+    "temporal_sigma_tok_s": 272.31291303316937,
+    "temporal_vs_full": 0.959917457641336,
+    "temporal_vs_fp32": 0.9423998650610069,
+    "event_fraction_median": 0.90625,
+    "event_fraction_p90": 0.96875
+  },
+  "test": {
+    "prompt": "One day the sun was shining",
+    "tokens": 128,
+    "fp32_tok_s": 299.9374067277649,
+    "fp_equal": true,
+    "temporal_equal_full_sigma": true,
+    "full_sigma_tok_s": 277.8843785308601,
+    "temporal_sigma_tok_s": 276.2477421479438,
+    "temporal_vs_full": 0.9941103692421686,
+    "temporal_vs_fp32": 0.9210179722553822,
+    "event_fraction_median": 0.90625,
+    "event_fraction_p90": 0.984375
+  },
+  "interpretation": "First combined per-operator sigma-delta plan validated on separate prompts with complete FP32 greedy parity. Quality is preserved, but ~91% event density makes the Python/Torch temporal path slower than FP32; sparse event execution is therefore reserved for genuinely low-innovation operators."
+}
