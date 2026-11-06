@@ -1,0 +1,28 @@
+name: quotient-real-receipts
+on:
+  push:
+    branches: [research/david-quotient-compiler]
+    paths:
+      - scripts/discover_compute_quotients.py
+      - .github/workflows/quotient-real-receipts.yml
+      - results/david_tom_foss_tinystories_real_event_e2e_2026-11-06.json
+      - results/david_tom_foss_tinystories_mixed_sigma_delta_2026-11-06.json
+      - results/david_tom_foss_tinystories_certified_subspace_head_2026-11-06.json
+      - results/david_tom_foss_smollm2_integer_event_layer_2026-11-06.json
+  workflow_dispatch:
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install -e .
+      - name: Discover measured real-model opportunities
+        run: |
+          python scripts/discover_compute_quotients.py             results/david_tom_foss_tinystories_real_event_e2e_2026-11-06.json             results/david_tom_foss_tinystories_mixed_sigma_delta_2026-11-06.json             results/david_tom_foss_tinystories_certified_subspace_head_2026-11-06.json             results/david_tom_foss_smollm2_integer_event_layer_2026-11-06.json             --top 50 | tee /tmp/real_quotients.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: real-model-quotient-discovery
+          path: /tmp/real_quotients.json
