@@ -3,7 +3,7 @@ import numpy as np
 from wirkung_math.quotient_benchmark import (
     make_observable_case, replay_observable_case,
     make_linear_chain_case, replay_linear_chain_case,
-    make_finite_state_case, replay_finite_state_case,
+    make_finite_state_case, replay_finite_state_case, benchmark_finite_state_case,
 )
 
 
@@ -46,3 +46,15 @@ def test_finite_state_benchmark_discovers_behavioral_quotient():
     assert result["state_compression"]==32.0
     assert result["proof_passed"] is True
     assert result["trajectory_equal"] is True
+
+
+def test_finite_state_benchmark_emits_timing_and_memory_receipt():
+    case=make_finite_state_case(
+        physical_states=128,behavior_classes=4,actions=2,steps=200,seed=504
+    )
+    result=benchmark_finite_state_case(case,repeats=2)
+    assert result["proof_passed"] is True
+    assert result["trajectory_equal"] is True
+    assert result["full_ms"] > 0
+    assert result["quotient_ms"] > 0
+    assert result["table_byte_reduction"] > 1
