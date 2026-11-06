@@ -6,6 +6,7 @@ os.environ.setdefault("OMP_NUM_THREADS","1")
 from wirkung_math.quotient_benchmark import (
     make_observable_case,benchmark_observable_case,
     make_linear_chain_case,benchmark_linear_chain_case,
+    make_finite_state_case,benchmark_finite_state_case,
 )
 
 
@@ -29,11 +30,20 @@ def main():
     linear=benchmark_linear_chain_case(chain,repeats=5)
     linear["discovery_and_benchmark_seconds"]=time.perf_counter()-start
 
+    finite=make_finite_state_case(
+        physical_states=65536,behavior_classes=16,actions=4,
+        steps=100000,seed=20261108,
+    )
+    start=time.perf_counter()
+    discrete=benchmark_finite_state_case(finite,repeats=3)
+    discrete["discovery_and_benchmark_seconds"]=time.perf_counter()-start
+
     result={
         "schema":"consumer-relative-quotient-benchmark/v1",
         "source":"David Tom Foss automated Quotient Compiler benchmark",
         "observable_state":obs,
         "linear_consumer":linear,
+        "finite_consumer_state":discrete,
     }
     print("RESULT "+json.dumps(result,sort_keys=True))
 
