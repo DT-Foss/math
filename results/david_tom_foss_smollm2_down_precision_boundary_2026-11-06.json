@@ -1,0 +1,52 @@
+{
+  "date": "2026-11-06",
+  "model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+  "scope": "only MLP down_proj activation input quantized; all other operators FP32",
+  "tokens": 32,
+  "fp_tok_s": 20.07682324892509,
+  "runs": [
+    {
+      "bits": 3,
+      "tok_s": 22.79598184033007,
+      "prefix_match": 0,
+      "all_tokens": false,
+      "first_logit_maxerr": 5.557156085968018
+    },
+    {
+      "bits": 4,
+      "tok_s": 22.6827902451584,
+      "prefix_match": 1,
+      "all_tokens": false,
+      "first_logit_maxerr": 3.7054834365844727
+    },
+    {
+      "bits": 5,
+      "tok_s": 21.89589344427538,
+      "prefix_match": 1,
+      "all_tokens": false,
+      "first_logit_maxerr": 1.23907470703125
+    },
+    {
+      "bits": 6,
+      "tok_s": 21.89138593111811,
+      "prefix_match": 18,
+      "all_tokens": false,
+      "first_logit_maxerr": 1.0786399841308594
+    },
+    {
+      "bits": 7,
+      "tok_s": 23.66069840386644,
+      "prefix_match": 32,
+      "all_tokens": true,
+      "first_logit_maxerr": 0.3104438781738281
+    },
+    {
+      "bits": 8,
+      "tok_s": 23.730784695111907,
+      "prefix_match": 32,
+      "all_tokens": true,
+      "first_logit_maxerr": 0.2689462900161743
+    }
+  ],
+  "interpretation": "For this prompt and 32 greedy steps, selective down-projection input quantization needs 7 bits to preserve the FP32 token sequence. Therefore low-bit coordinate code sparsity alone cannot deliver a quality-preserving temporal route; consumer/response-space coding is the next route."
+}
