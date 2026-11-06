@@ -1,0 +1,30 @@
+{
+  "source": "David Tom Foss Hugging Face CPU-basic actual-model consumer-sensitive temporal quantization experiment, 2026-11-06",
+  "model": "roneneldan/TinyStories-1M",
+  "quantizer": "global per-coordinate Viterbi over ternary codes",
+  "objective": "downstream diagonal linear sensitivity times squared distortion plus transition penalty",
+  "mlp_layer_7": {
+    "consumer_weighted_zero_event_point": {
+      "transition_penalty": 5.0,
+      "projection_mse_ratio_vs_nearest_quantization": 0.45302,
+      "event_ratio_vs_nearest_quantization": 0.0,
+      "median_changed_codes": 0.0
+    },
+    "interpretation": "For this measured trajectory, one temporally stable code per coordinate produced lower downstream projection MSE than independent nearest-code quantization while eliminating all code events."
+  },
+  "lm_head": {
+    "raw_activation_distortion_frontier": [
+      {"projection_budget": 1.05, "transition_penalty": 0.01, "projection_mse_ratio": 1.0344, "event_ratio": 0.95687, "median_changed_codes": 20.0},
+      {"projection_budget": 1.10, "transition_penalty": 0.02, "projection_mse_ratio": 1.08255, "event_ratio": 0.91716, "median_changed_codes": 19.0},
+      {"projection_budget": 1.25, "transition_penalty": 0.05, "projection_mse_ratio": 1.20709, "event_ratio": 0.82408, "median_changed_codes": 17.0},
+      {"projection_budget": 1.50, "transition_penalty": 0.10, "projection_mse_ratio": 1.42824, "event_ratio": 0.66646, "median_changed_codes": 14.0}
+    ],
+    "consumer_weighted_frontier": [
+      {"projection_budget": 1.05, "transition_penalty": 0.01, "projection_mse_ratio": 1.01462, "event_ratio": 0.94912, "median_changed_codes": 19.5},
+      {"projection_budget": 1.10, "transition_penalty": 0.02, "projection_mse_ratio": 1.07032, "event_ratio": 0.90630, "median_changed_codes": 19.0},
+      {"projection_budget": 1.25, "transition_penalty": 0.05, "projection_mse_ratio": 1.24859, "event_ratio": 0.77692, "median_changed_codes": 16.0},
+      {"projection_budget": 2.00, "transition_penalty": 0.10, "projection_mse_ratio": 1.50445, "event_ratio": 0.59882, "median_changed_codes": 12.0}
+    ]
+  },
+  "conclusion": "Quantization must be optimized against the actual downstream consumer and event cost. Raw activation MSE is not a reliable proxy: it can rank code trajectories opposite to their projection error and temporal compute cost."
+}
