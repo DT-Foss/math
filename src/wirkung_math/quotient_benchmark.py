@@ -292,3 +292,38 @@ def _freeze_benchmark_value(value):
     if isinstance(value,np.generic):
         return value.item()
     return value
+
+
+def benchmark_finite_state_case(
+    case:FiniteStateBenchmarkCase,*,repeats:int=5
+)->dict:
+    correctness=replay_finite_state_case(case)
+    q=FiniteStateConsumerQuotient.fit(case.transitions,case.outputs)
+
+    def full_run():
+        state=int(case.initial_state)
+        checksum=0
+        for action0 in case.actions:
+            checksum+=int(case.outputs[state])
+            state=int(case.transitions[state,int(action0)])
+        checksum+=int(case.outputs[state])
+        return checksum
+
+    def reduced_run():
+        state=int(q.class_of_state[int(case.initial_state)])
+        checksum=0
+        for action0 in case.actions:
+            checksum+=int(q.output_for_class(state))
+            state=q.step_class(state,int(action0))
+        checksum+=int(q.output_for_class(state))
+        return checksum
+
+    full_run(); reduced_run()
+    full_ms=_median_ms(full_run,repeats)
+    reduced_ms=_median_ms(reduced_run,repeats)
+    return {
+        **correctness,
+        "full_ms":full_ms,
+        "quotient_ms":reduced_ms,
+        "speedup":full_ms/reduced_ms,
+    }
