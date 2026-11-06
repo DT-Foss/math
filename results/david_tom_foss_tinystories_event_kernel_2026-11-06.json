@@ -1,0 +1,36 @@
+{
+  "date": "2026-11-06",
+  "model": "roneneldan/TinyStories-1M",
+  "layer": "transformer.h.3.attn.attention.out_proj",
+  "shape": [
+    64,
+    64
+  ],
+  "tokens": 128,
+  "fused_sequence": [
+    {
+      "bits": 2,
+      "block": 2,
+      "full_native_ms": 0.0677285,
+      "delta_native_ms": 0.0577675,
+      "delta_vs_native_full": 1.172432596182975,
+      "delta_vs_sequential_gemv": 3.032665426061367
+    },
+    {
+      "bits": 2,
+      "block": 4,
+      "full_native_ms": 0.049895,
+      "delta_native_ms": 0.051753,
+      "delta_vs_native_full": 0.9640986995922942,
+      "delta_vs_sequential_gemv": 3.3848375939559054
+    },
+    {
+      "bits": 3,
+      "block": 2,
+      "full_native_ms": 0.0704865,
+      "delta_native_ms": 0.0773755,
+      "delta_vs_native_full": 0.910966649650083
+    }
+  ],
+  "interpretation": "With wrapper dispatch removed, a real attention-out block2 2-bit event transition is 1.17x faster than the same native full LUT route and ~3x faster than sequential GEMV dispatch."
+}
