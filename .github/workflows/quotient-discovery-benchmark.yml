@@ -1,0 +1,32 @@
+name: quotient-discovery-benchmark
+on:
+  push:
+    branches: [research/david-quotient-compiler]
+    paths:
+      - src/wirkung_math/quotient_benchmark.py
+      - experiments/quotient_compiler_bench.py
+      - .github/workflows/quotient-discovery-benchmark.yml
+  workflow_dispatch:
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      OPENBLAS_NUM_THREADS: "1"
+      OMP_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install -e .
+      - name: Run automatic quotient discovery benchmark
+        run: |
+          python experiments/quotient_compiler_bench.py | tee /tmp/quotient.log
+          grep '^RESULT ' /tmp/quotient.log | sed 's/^RESULT //' > /tmp/quotient.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: quotient-discovery-result
+          path: |
+            /tmp/quotient.json
+            /tmp/quotient.log
