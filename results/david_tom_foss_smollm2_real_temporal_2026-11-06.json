@@ -1,0 +1,79 @@
+{
+  "date": "2026-11-06",
+  "model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+  "params": 134515008,
+  "config": {
+    "hidden": 576,
+    "intermediate": 1536,
+    "layers": 30,
+    "heads": 9,
+    "kv_heads": 3
+  },
+  "prompt": "The future of efficient AI is",
+  "new_tokens": 16,
+  "fp32": {
+    "seconds": 0.7248293179999905,
+    "tok_s": 22.074162292646403,
+    "text": "The future of efficient AI is to be more transparent, accountable, and inclusive. This means that AI systems should"
+  },
+  "quantized": [
+    {
+      "bits": 3,
+      "full_tok_s": 23.09718190388699,
+      "temporal_tok_s": 15.703606688275666,
+      "speedup": 0.679892757203983,
+      "fp_prefix_match": 0,
+      "temporal_argmax_match_steps": 16,
+      "max_logit_diff": 0,
+      "median_changed": {
+        "q_proj": 420,
+        "k_proj": 420,
+        "v_proj": 420,
+        "o_proj": 278,
+        "gate_proj": 414,
+        "up_proj": 414,
+        "down_proj": 883,
+        "lm_head": 353
+      }
+    },
+    {
+      "bits": 4,
+      "full_tok_s": 24.58245599956384,
+      "temporal_tok_s": 18.198028489287257,
+      "speedup": 0.7402852054168281,
+      "fp_prefix_match": 0,
+      "temporal_argmax_match_steps": 16,
+      "max_logit_diff": 0,
+      "median_changed": {
+        "q_proj": 500,
+        "k_proj": 500,
+        "v_proj": 500,
+        "o_proj": 374,
+        "gate_proj": 497,
+        "up_proj": 497,
+        "down_proj": 1172,
+        "lm_head": 445
+      }
+    },
+    {
+      "bits": 5,
+      "full_tok_s": 24.04408372147564,
+      "temporal_tok_s": 18.232298339883137,
+      "speedup": 0.7582862608151066,
+      "fp_prefix_match": 1,
+      "temporal_argmax_match_steps": 16,
+      "max_logit_diff": 0,
+      "median_changed": {
+        "q_proj": 541,
+        "k_proj": 541,
+        "v_proj": 541,
+        "o_proj": 469,
+        "gate_proj": 539,
+        "up_proj": 539,
+        "down_proj": 1368,
+        "lm_head": 523
+      }
+    }
+  ],
+  "interpretation": "Exact temporal code-delta replay matches each fixed-scale quantized model at all 16 greedy decisions, but coordinate/code support is dense on this real checkpoint; naive sparse-code routing is slower. Next route is temporal basis / recurring transition structure, not coordinate sparsity."
+}
