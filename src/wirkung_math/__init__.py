@@ -73,7 +73,7 @@ from .consumer_ir import (
     EvidenceLevel, ProgramNode, CandidateRoute, CompilationPolicy, ConsumerProgram,
 )
 from .linear_quotient import LinearConsumerQuotient, ObservableLinearQuotient
-from .linear_graph_quotient import LinearNodeQuotient, discover_linear_graph_quotients
+from .linear_graph_quotient import LinearNodeQuotient, CompiledLinearGraphQuotient, discover_linear_graph_quotients, compile_linear_graph_quotient
 from .quotient_discovery import EmpiricalQuotient, discover_empirical_quotient
 from .certificates import (
     LinearOrderCertificate, QuantizationCellCertificate, ThresholdCertificate,
@@ -132,7 +132,7 @@ __all__ = [
     "IntegerResponseLinearState","SignedDigitResponseLinearState","balanced_ternary_scales","balanced_ternary_encode","SigmaDeltaResponseLinearState",
     "EvidenceLevel","ProgramNode","CandidateRoute","CompilationPolicy","ConsumerProgram",
     "LinearConsumerQuotient","ObservableLinearQuotient",
-    "LinearNodeQuotient","discover_linear_graph_quotients",
+    "LinearNodeQuotient","CompiledLinearGraphQuotient","discover_linear_graph_quotients","compile_linear_graph_quotient",
     "EmpiricalQuotient","discover_empirical_quotient",
     "LinearOrderCertificate","QuantizationCellCertificate","ThresholdCertificate",
     "CompilationResult","QuotientCompiler","FiniteStateConsumerQuotient","ingest_result_receipt",
