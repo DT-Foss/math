@@ -1,0 +1,28 @@
+{
+  "source": "David Tom Foss Hugging Face CPU-basic actual end-to-end model experiment, 2026-11-06",
+  "model": "roneneldan/TinyStories-1M",
+  "parameters": 3745984,
+  "steps": 160,
+  "activation_arithmetic": "fixed per-coordinate ternary activation codes calibrated on a real greedy trace",
+  "full_quantized_model": {
+    "median_ms_per_token": 4.0075495,
+    "tokens_per_second": 249.52904511846955
+  },
+  "per_module_temporal_event_model": {
+    "median_ms_per_token": 8.0724175,
+    "tokens_per_second": 123.87862743719586,
+    "speedup_vs_full_quantized": 0.49644973144662047,
+    "modules": 49,
+    "module_calls": 7889,
+    "code_events": 190577,
+    "mean_events_per_module_call": 24.157307643554315,
+    "periodic_rebases": 147
+  },
+  "semantic_equivalence": {
+    "same_tokens": 160,
+    "same_token_fraction": 1.0,
+    "max_logit_abs_error": 0.00001621246337890625,
+    "median_logit_abs_error": 0.00000095367431640625
+  },
+  "conclusion": "The temporal state algebra reproduces the full quantized model's entire greedy token sequence, but one Python/PyTorch event wrapper per Linear module is 2.01x slower on this 64-wide model. The remaining bottleneck is dispatch and graph fragmentation, so the production route must fuse event detection, atomic/macro response caches and all consumers of a state into one codec-native block executor."
+}
