@@ -25,3 +25,11 @@ def test_linear_chain_benchmark_removes_dense_intermediate_exactly():
     assert result["dense_intermediate_dimension"]==40
     assert result["max_abs_error"] < 1e-9
     assert result["multiply_reduction"] > 1
+
+
+def test_observable_benchmark_receipt_is_plain_json():
+    import json
+    case=make_observable_case(state_dim=16,observable_dim=2,input_dim=1,steps=4,seed=502)
+    result=replay_observable_case(case)
+    json.dumps(result)
+    assert type(result["proof_passed"]) is bool
