@@ -210,3 +210,170 @@ The surviving execution hierarchy is:
 5. richer union-of-subspaces/dictionary representation only when held-out traces justify it.
 
 The compiler, not a universal sparse kernel, chooses the representation.
+
+
+## TinyStories: per-operator precision is a runtime state
+
+A 64-token sensitivity map was measured by changing exactly one operator at a time and requiring the full FP32 greedy sequence to remain identical.
+
+Examples of the minimum individually safe activation precision on this trace:
+
+- layer 0: Q 3-bit, K 4-bit, V 4-bit, attention-out 5-bit, MLP c-proj 8-bit;
+- layer 1: K 6-bit, V 5-bit, attention-out 8-bit, MLP c-proj 6-bit;
+- layer 2: Q 4-bit, attention-out 6-bit, MLP c-proj 7-bit;
+- layer 4: Q 4-bit, V 5-bit, attention-out 6-bit;
+- layer 5: Q 4-bit, K/V 5-bit, attention-out 6-bit, MLP c-proj 7-bit;
+- layer 7: V 4-bit, Q 5-bit, attention-out 6-bit.
+
+Several K projections and MLP c-projections remain unsafe even at the tested upper precision.
+
+Therefore precision is not a model-wide scalar. It is part of the per-operator execution state.
+
+Machine-readable record:
+`results/david_tom_foss_tinystories_precision_sensitivity_2026-11-06.json`.
+
+## Absolute signed-digit planes: measured boundary
+
+High precision was decomposed into 4–6 balanced ternary planes, each preserving a small block-state alphabet.
+
+This removes the exponential table growth of a single high-bit code, but absolute planes still changed too often:
+
+| planes | effective bits | temporal/full | FP32 prefix | dirty plane-blocks |
+|---:|---:|---:|---:|---:|
+| 4 | 6.34 | 0.965× | 14/128 | 82.8% |
+| 5 | 7.92 | 0.950× | 16/128 | 84.1% |
+| 6 | 9.51 | 0.953× | 30/128 | 84.9% |
+
+The route is therefore rejected in absolute-state form.
+
+The surviving transform is **error-feedback temporal coding**: encode level crossings relative to the reconstructed previous state instead of repeatedly encoding the absolute activation.
+
+Implementation:
+`SigmaDeltaResponseLinearState`.
+
+## Quality-preserving mixed Sigma-Delta compiler
+
+A real compiler pass used the measured per-operator sensitivity map as candidates.
+
+Procedure:
+
+1. fit activation step sizes on two compile prompts;
+2. greedily add a Sigma-Delta route only while the *combined* route set preserves every compile token;
+3. prune the combined plan against a separate validation prompt;
+4. evaluate on a third 128-token prompt.
+
+The compile pass initially accepted 26 operators. Validation reduced this to six early Q/K/V operators:
+
+- layer-0 Q: 4-bit;
+- layer-0 K: 4-bit;
+- layer-0 V: 3-bit;
+- layer-0 attention-out: 6-bit;
+- layer-1 K: 5-bit;
+- layer-1 V: 6-bit.
+
+### Separate validation prompt
+
+`A little dog was playing outside`, 64 tokens:
+
+- FP32: 288.96 tok/s;
+- Full Sigma-Delta semantics: 283.68 tok/s;
+- Temporal Sigma-Delta: 272.31 tok/s;
+- FP32 greedy sequence: **64/64 identical**;
+- temporal/full-Sigma sequence: **64/64 identical**;
+- median event fraction: 90.6%.
+
+### Held-out test prompt
+
+`One day the sun was shining`, 128 tokens:
+
+- FP32: 299.94 tok/s;
+- Full Sigma-Delta semantics: 277.88 tok/s;
+- Temporal Sigma-Delta: 276.25 tok/s;
+- FP32 greedy sequence: **128/128 identical**;
+- temporal/full-Sigma sequence: **128/128 identical**;
+- median event fraction: 90.6%.
+
+This closes the quality question for the compiled mixed plan: temporal error-feedback can preserve the complete FP32 greedy path on a separate test prompt. It does not yet accelerate this model because the selected operators remain event-dense.
+
+Machine-readable record:
+`results/david_tom_foss_tinystories_mixed_sigma_delta_2026-11-06.json`.
+
+## Exact vocabulary demand: certified subspace head
+
+The 50,257×64 LM head was tested as an exact maximum-inner-product search problem.
+
+A basis learned from 256 real decoder hidden states provides, for every vocabulary row, an exact Cauchy upper bound from its projected component plus residual norm.
+
+All tested greedy tokens remained exact.
+
+At rank 48, the one-shot certificate reduced the median exact candidate count from 50,257 to:
+
+- 32 on `Once upon a time`;
+- 32 on `A small dog went to the park`;
+- 32 on `One day the sun was shining`.
+
+Progressive stages tighten the certificate further. With stages 4→12→24→40→56, final median candidate counts are **2** on all three prompts.
+
+For example:
+
+- `Once upon a time`: 50,257 → 50,257 → 26,804 → 85 → **2**;
+- `A small dog went to the park`: 50,257 → 50,257 → 50,256 → 174 → **2**;
+- `One day the sun was shining`: 50,257 → 50,242 → 15,043 → 163 → **2**.
+
+This is a real exact demand collapse of more than four orders of magnitude at the final scoring stage.
+
+### Performance boundary
+
+The Python/Torch implementation and a first scalar native implementation remain slower than the full 64D SGEMV.
+
+Native staged execution reaches roughly 0.44–0.54× of full-head throughput on this model despite the final two-candidate set.
+
+The reason is specific and measured: hidden width 64 makes the dense head extremely cheap, while early bound stages still touch much of the vocabulary.
+
+This route remains structurally important for wide vocabulary heads / wider hidden states, but TinyStories is below its hardware crossover.
+
+Machine-readable records:
+
+- `results/david_tom_foss_tinystories_certified_subspace_head_2026-11-06.json`;
+- `results/david_tom_foss_tinystories_progressive_head_2026-11-06.json`;
+- `results/david_tom_foss_tinystories_native_certified_head_2026-11-06.json`.
+
+## Real-model conclusion
+
+The real decoder campaign establishes five separate facts.
+
+### 1. Temporal execution itself works end-to-end
+
+TinyStories demonstrates a complete persistent event executor with a measured 1.043× temporal/full gain inside identical 2-bit compiled semantics.
+
+### 2. Deterministic accumulators solve temporal arithmetic identity
+
+SmolLM2 and TinyStories response-state experiments show that full and temporal compiled arithmetic can be made identical through integer response accumulators rather than recursively accumulating FP32 outputs.
+
+### 3. FP32-quality preservation is compiler-selective
+
+The mixed Sigma-Delta plan preserves a separate 128-token FP32 greedy sequence exactly. Quality preservation therefore does not require every operator to use the same temporal representation.
+
+### 4. Standard dense checkpoints are not naturally event-native
+
+On SmolLM2 and TinyStories, high-precision activation states change densely. A runtime that simply waits for sparse FP32/7-bit coordinate changes is not the moonshot.
+
+The model representation must expose temporally stable response/event coordinates deliberately.
+
+### 5. The Origami target becomes sharper
+
+The required model/runtime co-design is now:
+
+`checkpoint -> temporal census -> per-operator precision/event representation -> deterministic response state -> cost crossover -> full/delta route`.
+
+Origami/HCGM is a better target than an ordinary FP32 checkpoint because its compressed code representation can be laid out directly around response events rather than retrofitting event semantics after training.
+
+The next Origami measurement is no longer an open-ended search. It must report, per operator:
+
+- event rate at the model's native code precision;
+- response-page bytes touched per token;
+- integer-state reuse;
+- full/delta crossover;
+- cross-lane event sharing;
+- resulting end-to-end tok/s.
+
