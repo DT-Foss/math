@@ -1,6 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass,replace
 from typing import Any
+from .consumer_ir import ProgramNode,ConsumerProgram
 
 
 @dataclass(frozen=True)
@@ -154,3 +155,86 @@ def annotate_remath_trace(trace: Any) -> list[dict[str,Any]]:
             "consumer_sensitive":hint.consumer_sensitive,
         })
     return out
+
+
+def _dependency_ids(node:Any)->tuple[str,...]:
+    raw=_get(node,"inputs",None)
+    if raw is None:
+        raw=_get(node,"dependencies",None)
+    if raw is None:
+        raw=_get(node,"parents",())
+    if isinstance(raw,(str,bytes)):
+        raw=(raw,)
+    out=[]
+    for value in raw or ():
+        if isinstance(value,dict):
+            dep=_get(value,"id",_get(value,"name",""))
+        else:
+            dep=_get(value,"id",value)
+        dep=str(dep)
+        if dep:
+            out.append(dep)
+    return tuple(out)
+
+
+def consumer_program_from_remath_trace(
+    trace:Any,*,changed:set[str]|frozenset[str],
+    requested:set[str]|frozenset[str],
+)->ConsumerProgram:
+    """
+    Lower a dependency-bearing Remath trace into the Quotient Compiler IR.
+
+    The bridge preserves operator payload metadata such as matrices/shapes while
+    using Remath's semantic classification to choose the compiler family.
+    """
+    raw_nodes=_get(trace,"nodes",[])
+    if isinstance(raw_nodes,dict):
+        raw_nodes=list(raw_nodes.values())
+    nodes=[]
+    family_map={
+        "linear_map":"linear",
+        "additive_reduction":"additive_reduction",
+        "normalized_reduction":"normalized_reduction",
+        "normalized_bilinear":"normalized_bilinear",
+        "normalization":"normalization",
+        "elementwise_nonlinearity":"elementwise",
+        "order_reduction":"order_reduction",
+        "spectral_transform":"spectral",
+    }
+    for raw in raw_nodes:
+        node_id=str(_get(raw,"id",_get(raw,"name","")))
+        if not node_id:
+            raise ValueError("Remath node is missing id/name")
+        category=str(_get(raw,"category","")).lower()
+        inputs=_dependency_ids(raw)
+        formula=_get(raw,"formula",{})
+        hint=classify_remath_formula(formula)
+        is_source=(category=="source" or (not inputs and not _get(raw,"formula",None)))
+        family="source" if is_source else family_map.get(hint.family,hint.family)
+        metadata={}
+        shape=_get(raw,"shape",None)
+        if shape is not None:
+            metadata["shape"]=shape
+            if family=="source":
+                try:
+                    metadata["dimension"]=int(shape[-1])
+                except (TypeError,IndexError):
+                    pass
+        dimension=_get(raw,"dimension",None)
+        if dimension is not None:
+            metadata["dimension"]=int(dimension)
+        matrix=_get(raw,"matrix",None)
+        if matrix is not None:
+            metadata["matrix"]=matrix
+        metadata.update({
+            "remath_name":str(_get(raw,"name","")),
+            "remath_category":category,
+            "canonical_name":hint.canonical_name,
+            "wirkung_family":hint.family,
+            "rewrite":hint.rewrite,
+            "temporal_rewrite":temporalize_hint(hint).temporal_rewrite,
+        })
+        nodes.append(ProgramNode(node_id,family,inputs,metadata))
+    return ConsumerProgram(
+        tuple(nodes),frozenset(changed),frozenset(requested)
+    )
