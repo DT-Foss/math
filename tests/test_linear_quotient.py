@@ -61,3 +61,18 @@ def test_observable_quotient_full_rank_when_every_state_is_visible():
     q=ObservableLinearQuotient.fit(A,B,C)
     assert q.dimension==3
     assert q.invariance_residual < 1e-12
+
+
+def test_observable_discovery_uses_low_rank_krylov_closure():
+    rng=np.random.default_rng(402)
+    n,r=128,4
+    Q,_=np.linalg.qr(rng.normal(size=(n,r)))
+    P=np.roll(np.eye(r),-1,axis=1)*.9
+    A=.3*np.eye(n)+Q@(P-.3*np.eye(r))@Q.T
+    B=rng.normal(size=(n,2))
+    C=np.zeros((1,r));C[0,0]=1.;C=C@Q.T
+    q=ObservableLinearQuotient.fit(A,B,C)
+    assert q.dimension==r
+    assert q.discovery_method=="krylov_closure"
+    assert q.closure_iterations <= r+1
+    assert q.generated_basis_columns < n
