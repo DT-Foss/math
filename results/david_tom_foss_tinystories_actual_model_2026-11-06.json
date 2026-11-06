@@ -1,0 +1,86 @@
+{
+  "source": "David Tom Foss Hugging Face CPU-basic actual-model experiment, 2026-11-06",
+  "model": "roneneldan/TinyStories-1M",
+  "model_type": "GPT-Neo causal language model",
+  "parameters": 3745984,
+  "generated_steps": 160,
+  "decode": {
+    "median_ms_per_token": 4.468458,
+    "tokens_per_second": 223.79084686484688
+  },
+  "actual_temporal_state": {
+    "final_pre": {"width": 64, "median_2bit_code_changes": 18.0, "delta_rank99": 50, "delta_rank999": 61},
+    "attention_context_layer_1": {"width": 64, "median_2bit_code_changes": 6.0, "delta_rank99": 27, "delta_rank999": 42},
+    "attention_context_layer_2": {"width": 64, "median_2bit_code_changes": 9.0, "delta_rank99": 32, "delta_rank999": 48},
+    "attention_context_layer_7": {"width": 64, "median_2bit_code_changes": 12.0, "delta_rank99": 41, "delta_rank999": 57},
+    "query_layer_2": {"width": 64, "median_2bit_code_changes": 9.5, "delta_rank99": 16, "delta_rank999": 27},
+    "key_layer_2": {"width": 64, "median_2bit_code_changes": 8.0, "delta_rank99": 22, "delta_rank999": 34},
+    "mlp_activation_layer_7": {"width": 256, "median_2bit_code_changes": 48.0, "delta_rank99": 60, "delta_rank999": 99}
+  },
+  "top64_candidate_branch_rank99_by_layer": [40, 37, 33, 34, 35, 35, 34, 33, 36],
+  "generic_route_boundaries": {
+    "raw_fp32_coordinate_delta": "dense at all measured transformer states",
+    "top64_candidate_branch_lowrank": "rank-33-to-40 for 99% energy; generic factorized route is not profitable",
+    "independent_2bit_code_linear_all_modules": {
+      "aggregate_speedup": 0.95,
+      "slower_modules": 32,
+      "best_module": "lm_head",
+      "best_module_speedup": 1.065,
+      "lm_head_median_changed_codes": 22.0
+    },
+    "independent_3bit_code_linear_all_modules": {"aggregate_speedup": 0.468, "slower_modules": 33},
+    "independent_4bit_code_linear_all_modules": {"aggregate_speedup": 0.353, "slower_modules": 32}
+  },
+  "actual_qk_partition_attention": {
+    "rank2_2bit": {
+      "tokens": 161,
+      "groups": 6,
+      "compression_ratio": 26.833333333333332,
+      "exact_error_vs_quantized_scores": 2.0816681711721685e-17,
+      "max_error_vs_original_attention": 0.009921048223080834
+    },
+    "rank2_3bit": {
+      "tokens": 161,
+      "groups": 21,
+      "compression_ratio": 7.666666666666667,
+      "exact_error_vs_quantized_scores": 1.3877787807814457e-17,
+      "max_error_vs_original_attention": 0.003509428689904809
+    },
+    "rank2_4bit": {
+      "tokens": 161,
+      "groups": 47,
+      "compression_ratio": 3.425531914893617,
+      "exact_error_vs_quantized_scores": 1.3877787807814457e-17,
+      "max_error_vs_original_attention": 0.0023944663388774257
+    },
+    "rank4_3bit": {
+      "tokens": 161,
+      "groups": 65,
+      "compression_ratio": 2.476923076923077,
+      "exact_error_vs_quantized_scores": 5.551115123125783e-17,
+      "max_error_vs_original_attention": 0.002736194375398595
+    }
+  },
+  "transition_regularized_quantization_at_mse_ratio_le_1_10": {
+    "attention_context_layer_1": {"event_ratio": 0.07198443759766436, "median_changed_codes": 0.0, "projection_mse_ratio": 1.0907455470211345},
+    "attention_context_layer_2": {"event_ratio": 0.48321263989466756, "median_changed_codes": 4.0, "projection_mse_ratio": 1.040610081698133},
+    "attention_context_layer_7": {"event_ratio": 0.36747766235703464, "median_changed_codes": 4.0, "projection_mse_ratio": 1.126158776872101},
+    "qkv_input_layer_2": {"event_ratio": 0.6792105263157895, "median_changed_codes": 17.0, "projection_mse_ratio": 1.4214376307456144},
+    "mlp_activation_layer_7": {"event_ratio": 0.6258269343434771, "median_changed_codes": 29.0, "projection_mse_ratio": 0.7940492301814454},
+    "lm_head_input": {"event_ratio": 0.6664598200434378, "median_changed_codes": 14.0, "projection_mse_ratio": 1.4284299534383909}
+  },
+  "transition_regularized_mlp_aggressive_point": {
+    "activation_mse_ratio": 1.4455347857012546,
+    "projection_mse_ratio": 0.5744825527772462,
+    "event_ratio": 0.0932786451448218,
+    "median_changed_codes": 4.0
+  },
+  "actual_2bit_transition_recurrence_over_512_steps": {
+    "attention_context_layer_1": {"median_events": 3.0, "support_pattern_reuse": 0.2324, "exact_pattern_reuse": 0.168, "top_exact_pattern_frequency": 29, "atomic_transition_types": 187, "mean_atomic_reuse": 10.193, "top_atomic_frequency": 56},
+    "attention_context_layer_2": {"median_events": 6.0, "support_pattern_reuse": 0.0254, "exact_pattern_reuse": 0.0234, "top_exact_pattern_frequency": 7, "atomic_transition_types": 219, "mean_atomic_reuse": 14.781, "top_atomic_frequency": 50},
+    "attention_context_layer_7": {"median_events": 7.0, "support_pattern_reuse": 0.0078, "exact_pattern_reuse": 0.002, "top_exact_pattern_frequency": 2, "atomic_transition_types": 209, "mean_atomic_reuse": 19.713, "top_atomic_frequency": 78},
+    "mlp_activation_layer_7": {"median_events": 25.0, "support_pattern_reuse": 0.0, "exact_pattern_reuse": 0.0, "atomic_transition_types": 540, "mean_atomic_reuse": 23.263, "top_atomic_frequency": 83},
+    "lm_head_input": {"median_events": 16.0, "support_pattern_reuse": 0.0, "exact_pattern_reuse": 0.0, "atomic_transition_types": 300, "mean_atomic_reuse": 26.7, "top_atomic_frequency": 78}
+  },
+  "conclusion": "The actual mini-transformer rejects generic raw-float sparsity and branch-low-rank execution. Its profitable structure is discrete: temporally stable activation codes, repeated atomic code transitions, and compact quantized attention signatures."
+}
