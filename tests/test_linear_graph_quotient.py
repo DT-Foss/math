@@ -88,3 +88,25 @@ def test_compiled_reduced_linear_dag_executes_requested_outputs_exactly():
     np.testing.assert_allclose(got["y1"],C1@A@x,rtol=1e-11,atol=1e-11)
     np.testing.assert_allclose(got["y2"],C2@A@x,rtol=1e-11,atol=1e-11)
     assert compiled.reduced_matrices["h"].shape==(5,compiled.node_dimensions["x"])
+
+
+def test_compiled_reduced_dag_batch_execution_matches_full():
+    rng=np.random.default_rng(424)
+    A=rng.normal(size=(32,48))
+    Q,_=np.linalg.qr(rng.normal(size=(32,4)))
+    C1=rng.normal(size=(5,4))@Q.T
+    C2=rng.normal(size=(6,4))@Q.T
+    p=ConsumerProgram(
+        (
+            ProgramNode("x","source",metadata={"dimension":48}),
+            ProgramNode("h","linear",("x",),{"matrix":A}),
+            ProgramNode("y1","linear",("h",),{"matrix":C1}),
+            ProgramNode("y2","linear",("h",),{"matrix":C2}),
+        ),
+        frozenset({"x"}),frozenset({"y1","y2"}),
+    )
+    compiled=compile_linear_graph_quotient(p)
+    X=rng.normal(size=(20,48))
+    got=compiled.run_batch({"x":X})
+    np.testing.assert_allclose(got["y1"],X@A.T@C1.T,rtol=1e-11,atol=1e-11)
+    np.testing.assert_allclose(got["y2"],X@A.T@C2.T,rtol=1e-11,atol=1e-11)
