@@ -4,6 +4,7 @@ import statistics
 import time
 import numpy as np
 from .linear_quotient import LinearConsumerQuotient,ObservableLinearQuotient
+from .finite_quotient import FiniteStateConsumerQuotient
 
 
 @dataclass(frozen=True)
@@ -194,3 +195,100 @@ def benchmark_linear_chain_case(
         "quotient_ms":reduced_ms,
         "speedup":full_ms/reduced_ms,
     }
+
+
+@dataclass(frozen=True)
+class FiniteStateBenchmarkCase:
+    transitions:np.ndarray
+    outputs:np.ndarray
+    initial_state:int
+    actions:np.ndarray
+    planted_classes:int
+
+
+def make_finite_state_case(
+    *,physical_states:int,behavior_classes:int,actions:int,
+    steps:int,seed:int=0,
+)->FiniteStateBenchmarkCase:
+    if physical_states<=0 or behavior_classes<=0 or actions<=0 or steps<=0:
+        raise ValueError("finite-state dimensions must be positive")
+    if physical_states%behavior_classes:
+        raise ValueError("physical_states must be divisible by behavior_classes")
+    copies=physical_states//behavior_classes
+    rng=np.random.default_rng(seed)
+    class_transition=np.empty((behavior_classes,actions),dtype=np.int64)
+    for a in range(actions):
+        # Each action is a nonzero rotation of one hidden behavior cycle.
+        class_transition[:,a]=(
+            np.arange(behavior_classes)+(a+1)
+        )%behavior_classes
+    # Current output is deliberately much coarser than the true quotient.
+    # Future behavior under the cycle separates all hidden classes.
+    class_output=(np.arange(behavior_classes)==0).astype(np.int64)
+    T=np.empty((physical_states,actions),dtype=np.int64)
+    outputs=np.empty(physical_states,dtype=np.int64)
+    for cls in range(behavior_classes):
+        for copy in range(copies):
+            state=cls*copies+copy
+            outputs[state]=class_output[cls]
+            for a in range(actions):
+                nxt=int(class_transition[cls,a])
+                # Physical copies evolve differently while remaining in the
+                # same future consumer-equivalence class.
+                nxt_copy=(copy*(a+2)+a+1)%copies
+                T[state,a]=nxt*copies+nxt_copy
+    action_trace=rng.integers(0,actions,size=steps,dtype=np.int64)
+    initial=int(rng.integers(0,physical_states))
+    return FiniteStateBenchmarkCase(
+        T,outputs,initial,action_trace,int(behavior_classes)
+    )
+
+
+def replay_finite_state_case(case:FiniteStateBenchmarkCase)->dict:
+    q=FiniteStateConsumerQuotient.fit(case.transitions,case.outputs)
+    physical=int(case.initial_state)
+    reduced=int(q.class_of_state[physical])
+    equal=True
+    for action0 in case.actions:
+        action=int(action0)
+        full_output=case.outputs[physical]
+        reduced_output=q.output_for_class(reduced)
+        if _freeze_benchmark_value(full_output)!=_freeze_benchmark_value(reduced_output):
+            equal=False
+            break
+        physical=int(case.transitions[physical,action])
+        reduced=q.step_class(reduced,action)
+    if equal:
+        equal=(
+            _freeze_benchmark_value(case.outputs[physical])
+            ==_freeze_benchmark_value(q.output_for_class(reduced))
+        )
+    full_bytes=int(case.transitions.nbytes+case.outputs.nbytes)
+    reduced_bytes=int(
+        q.reduced_transition.nbytes
+        +q.representative_state.nbytes
+        +q.class_of_state[:q.class_count].nbytes
+    )
+    return {
+        "physical_states":q.state_count,
+        "discovered_classes":q.class_count,
+        "planted_classes":int(case.planted_classes),
+        "state_compression":q.state_compression,
+        "refinement_rounds":q.refinement_rounds,
+        "proof_passed":bool(q.proof_passed),
+        "trajectory_equal":bool(equal),
+        "full_table_bytes":full_bytes,
+        "reduced_table_bytes":reduced_bytes,
+        "table_byte_reduction":float(full_bytes/max(1,reduced_bytes)),
+        "steps":int(len(case.actions)),
+    }
+
+
+def _freeze_benchmark_value(value):
+    if isinstance(value,np.ndarray):
+        return tuple(_freeze_benchmark_value(x) for x in value.tolist())
+    if isinstance(value,(list,tuple)):
+        return tuple(_freeze_benchmark_value(x) for x in value)
+    if isinstance(value,np.generic):
+        return value.item()
+    return value
