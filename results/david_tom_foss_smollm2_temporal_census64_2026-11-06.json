@@ -1,0 +1,73 @@
+{
+  "date": "2026-11-06",
+  "model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+  "tokens": 64,
+  "note": "Real FP32 greedy trace. Effective ranks are in-sample across 63 temporal deltas; holdout residual is basis fit on first half, evaluated on second half.",
+  "categories": {
+    "q": {
+      "layers": 30,
+      "width": 576,
+      "rank90": 26,
+      "rank99": 47,
+      "rank999": 57,
+      "holdout_r8": 0.8265569551,
+      "holdout_r16": 0.7711033364,
+      "holdout_r32": 0.7200020139,
+      "bit2_change": 0.3012152778,
+      "bit2_delta_block4_hit": 0.5945767196,
+      "bit2_absolute_block4_hit": 0.7525499132,
+      "bit3_change": 0.7005208333,
+      "bit3_delta_block4_hit": 0.0730268959,
+      "bit3_absolute_block4_hit": 0.149468316
+    },
+    "gate": {
+      "layers": 30,
+      "width": 576,
+      "rank90": 28,
+      "rank99": 48,
+      "rank999": 58,
+      "holdout_r8": 0.8827266644,
+      "holdout_r16": 0.8309226809,
+      "holdout_r32": 0.7783846311,
+      "bit2_change": 0.2986111111,
+      "bit2_delta_block4_hit": 0.5950727513,
+      "bit2_absolute_block4_hit": 0.7507052951,
+      "bit3_change": 0.6944444444,
+      "bit3_delta_block4_hit": 0.074845679,
+      "bit3_absolute_block4_hit": 0.1492513021
+    },
+    "down": {
+      "layers": 30,
+      "width": 1536,
+      "rank90": 29,
+      "rank99": 49,
+      "rank999": 58,
+      "holdout_r8": 0.9438332251,
+      "holdout_r16": 0.9024276505,
+      "holdout_r32": 0.8657103163,
+      "bit2_change": 0.1770833333,
+      "bit2_delta_block4_hit": 0.7447089947,
+      "bit2_absolute_block4_hit": 0.8425089518,
+      "bit3_change": 0.5309244792,
+      "bit3_delta_block4_hit": 0.2188533399,
+      "bit3_absolute_block4_hit": 0.3983561198
+    },
+    "lm_head": {
+      "layers": 1,
+      "width": 576,
+      "rank90": 25,
+      "rank99": 47,
+      "rank999": 58,
+      "holdout_r8": 0.7955878497,
+      "holdout_r16": 0.7506079929,
+      "holdout_r32": 0.7025402517,
+      "bit2_change": 0.3038194444,
+      "bit2_delta_block4_hit": 0.5946869489,
+      "bit2_absolute_block4_hit": 0.7585720486,
+      "bit3_change": 0.6753472222,
+      "bit3_delta_block4_hit": 0.0925925926,
+      "bit3_absolute_block4_hit": 0.1691623264
+    }
+  },
+  "interpretation": "Fixed low-rank temporal bases generalize poorly on this trace; the stronger real structure is low-bit recurring block state, especially 2-bit code blocks and MLP-down."
+}
