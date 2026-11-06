@@ -123,3 +123,71 @@ def discover_linear_graph_quotients(
                 requirements[dep].append((ridx,label,Rchild@M))
 
     return tuple(discovered[name] for name in order if name in discovered)
+
+
+@dataclass(frozen=True)
+class CompiledLinearGraphQuotient:
+    program:ConsumerProgram
+    quotients:tuple[LinearNodeQuotient,...]
+    reduced_matrices:dict[str,np.ndarray]
+    node_dimensions:dict[str,int]
+
+    @property
+    def quotient_map(self)->dict[str,LinearNodeQuotient]:
+        return {q.node:q for q in self.quotients}
+
+    def run(self,source_values:dict[str,np.ndarray])->dict[str,np.ndarray]:
+        qmap=self.quotient_map
+        order=_topological_order(self.program)
+        states={}
+        for name in order:
+            if name not in qmap:
+                continue
+            node=self.program.node_map[name]
+            q=qmap[name]
+            if node.family=="source":
+                if name not in source_values:
+                    raise ValueError(f"missing source value {name!r}")
+                x=np.asarray(source_values[name],dtype=np.float64)
+                if x.shape!=(q.state_dimension,):
+                    raise ValueError(f"source shape mismatch for {name!r}")
+                states[name]=q.basis.T@x
+            else:
+                dep=node.inputs[0]
+                states[name]=self.reduced_matrices[name]@states[dep]
+        outputs={}
+        for name in self.program.requested:
+            if name not in states:
+                raise ValueError(f"requested node {name!r} was not compiled")
+            q=qmap[name]
+            outputs[name]=q.basis@states[name]
+        return outputs
+
+
+def compile_linear_graph_quotient(
+    program:ConsumerProgram,
+)->CompiledLinearGraphQuotient:
+    quotients=discover_linear_graph_quotients(program)
+    qmap={q.node:q for q in quotients}
+    _,matrices=_dimensions_and_matrices(
+        program,_topological_order(program)
+    )
+    reduced={}
+    for q in quotients:
+        node=program.node_map[q.node]
+        if node.family!="linear":
+            continue
+        dep=node.inputs[0]
+        if dep not in qmap:
+            raise ValueError(
+                f"required linear node {q.node!r} depends on uncompiled {dep!r}"
+            )
+        Qout=q.basis
+        Qin=qmap[dep].basis
+        reduced[q.node]=Qout.T@matrices[q.node]@Qin
+    return CompiledLinearGraphQuotient(
+        program=program,
+        quotients=quotients,
+        reduced_matrices=reduced,
+        node_dimensions={q.node:q.required_dimension for q in quotients},
+    )
