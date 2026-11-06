@@ -309,13 +309,16 @@ def benchmark_finite_state_case(
         checksum+=int(case.outputs[state])
         return checksum
 
+    reduced_transition=q.reduced_transition
+    reduced_outputs=np.asarray(q.reduced_outputs)
+
     def reduced_run():
         state=int(q.class_of_state[int(case.initial_state)])
         checksum=0
         for action0 in case.actions:
-            checksum+=int(q.output_for_class(state))
-            state=q.step_class(state,int(action0))
-        checksum+=int(q.output_for_class(state))
+            checksum+=int(reduced_outputs[state])
+            state=int(reduced_transition[state,int(action0)])
+        checksum+=int(reduced_outputs[state])
         return checksum
 
     full_run(); reduced_run()
