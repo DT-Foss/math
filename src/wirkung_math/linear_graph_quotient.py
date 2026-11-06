@@ -163,6 +163,40 @@ class CompiledLinearGraphQuotient:
             outputs[name]=q.basis@states[name]
         return outputs
 
+    def run_batch(
+        self,source_values:dict[str,np.ndarray]
+    )->dict[str,np.ndarray]:
+        qmap=self.quotient_map
+        order=_topological_order(self.program)
+        states={}
+        batch_size=None
+        for name in order:
+            if name not in qmap:
+                continue
+            node=self.program.node_map[name]
+            q=qmap[name]
+            if node.family=="source":
+                if name not in source_values:
+                    raise ValueError(f"missing source value {name!r}")
+                x=np.asarray(source_values[name],dtype=np.float64)
+                if x.ndim!=2 or x.shape[1]!=q.state_dimension:
+                    raise ValueError(f"source batch shape mismatch for {name!r}")
+                if batch_size is None:
+                    batch_size=x.shape[0]
+                elif x.shape[0]!=batch_size:
+                    raise ValueError("source batch sizes do not match")
+                states[name]=x@q.basis
+            else:
+                dep=node.inputs[0]
+                states[name]=states[dep]@self.reduced_matrices[name].T
+        outputs={}
+        for name in self.program.requested:
+            if name not in states:
+                raise ValueError(f"requested node {name!r} was not compiled")
+            q=qmap[name]
+            outputs[name]=states[name]@q.basis.T
+        return outputs
+
 
 def compile_linear_graph_quotient(
     program:ConsumerProgram,
