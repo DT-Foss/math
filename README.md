@@ -52,6 +52,7 @@ The goal is not to make a CPU imitate a GPU kernel-by-kernel. The goal is to rep
 - `docs/ORIGAMI_TEMPORAL_DELTA_MACHINE_2026-11-05.md` — transformer state-machine architecture
 - `docs/ORIGAMI_DELTA_NATIVE_LAYOUT_2026-11-05.md` — direction-major codec layout and 160–365 tok/s architecture budgets
 - `docs/ORIGAMI_TEMPORAL_IP_CLAIM_MAP_2026-11-05.md` — technical invention-disclosure map
+- `docs/REAL_MODEL_TEMPORAL_VALIDATION_2026-11-06.md` — real SmolLM2/TinyStories decode validation and measured boundaries
 - `tools/remath/` — leak-safe Remath portability integration
 - `results/` — machine-readable imported/generated records
 - `scripts/origami_temporal_census.py` — actual Origami/Beast temporal geometry census
@@ -114,3 +115,23 @@ The repository contains direct resident-V100 comparisons, not only CPU-vs-CPU ba
 The next hardware phase diagram is:
 
 `CPU_delta ↔ GPU_delta ↔ GPU_full`.
+
+
+## Real decoder validation
+
+The temporal runtime has now been exercised on two public causal decoders rather than synthetic operators only:
+
+- **SmolLM2-135M-Instruct** — 134.5M parameters, 30 Llama layers;
+- **TinyStories-1M** — 3.75M parameters, 8 GPT-Neo layers.
+
+Measured conclusions:
+
+- raw FP32 / high-bit coordinate deltas are dense on ordinary checkpoints;
+- simple fixed temporal PCA, static short-block response VQ, absolute signed-digit planes, and loose vocabulary Cauchy bounds do not provide a profitable universal route;
+- deterministic response-quantized integer accumulators make temporal and full compiled arithmetic identical;
+- a complete TinyStories 2-bit event executor gives **1.043× end-to-end temporal/full speedup** inside identical compiled semantics;
+- a mixed per-operator Sigma-Delta compiler preserves a separate **128/128-token FP32 greedy sequence exactly**, but ~90.6% event density leaves it below the full FP32 crossover;
+- real low-bit block transitions can repeat above 90% on selected TinyStories operators;
+- exact vocabulary demand can collapse 50,257 rows to a median **2 final candidates**, although the tiny 64-wide head remains below the hardware crossover for staged certification.
+
+The resulting compiler target is therefore per-operator **precision × event representation × hardware route**, with deterministic full execution as the cost/quality fallback.
